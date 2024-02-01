@@ -17,9 +17,9 @@ Then, pre-trained parameter will converted to SNN.(main_distributed.py)
 # How to RUN
 Run
 ```
-torchrun --nproc_per_node "num_of_gpu" main_distributed.py "data_path of ImageNet" --model swin_tiny_patch4_window7_224 --batch-size "batch_size" --resume model_best.pth.tar --base "base B" --timestep "number of timestep"
+torchrun --nproc_per_node "num_of_gpu" main_distributed.py "data_path of ImageNet" --model swin_tiny_patch4_window7_224 --batch-size "batch_size" --resume "path of pre-trained ANN" --base "base B" --timestep "number of timestep"
 ```
-You can see result(accuracy/energy) as "output.log"
+In result, you can see result (accuracy/energy) as "output.log"
 
 Hyper Parameter:
 1. Number of Timestep (-t)   (Default: 40)
