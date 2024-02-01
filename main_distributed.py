@@ -434,13 +434,6 @@ def validate(
             flops = model.module.flops()
         else:
             flops = model.flops()
-        print(
-            f'{log_name}:  '
-            f'Acc@1: {top1_m.avg:>7.3f}  '
-            f'Acc@5: {top5_m.avg:>7.3f}  '
-            f"number of GFLOPs: {flops / 1e9:>7.3f}  "
-            f"ANN Energy (mJ): {flops / 1e9 * 4.6:>7.3f}  "
-        )
         logger.info(
             f'{log_name}:  '
             f'Acc@1: {top1_m.avg:>7.3f}  '
@@ -543,14 +536,9 @@ def snn_validate(
                     f'Acc@1: {top1_m.val:>7.3f} ({top1_m.avg:>7.3f})  '
                     f'Acc@5: {top5_m.val:>7.3f} ({top5_m.avg:>7.3f})'
                 )
-                print(
-                    f'{log_name}: [{batch_idx:>4d}/{last_idx}]  '
-                    f'Time: {batch_time_m.val:.3f} ({batch_time_m.avg:.3f})  '
-                    f'Acc@1: {top1_m.val:>7.3f} ({top1_m.avg:>7.3f})  '
-                    f'Acc@5: {top5_m.val:>7.3f} ({top5_m.avg:>7.3f})'
-                )
+
             if (top1_m.avg < 10):
-                print("too much low accuracy")
+                print("break bc of too much low accuracy")
                 break
 
     if utils.is_primary(args):
@@ -568,12 +556,7 @@ def snn_validate(
             f'Acc@5: {top5_m.avg:>7.3f}  '
             f"Energy of SNN (mJ): {energy / 1e9 *0.9:>7.3f}  "
         )
-        print(
-            f'{log_name}:  '
-            f'Acc@1: {top1_m.avg:>7.3f}  '
-            f'Acc@5: {top5_m.avg:>7.3f}  '
-            f"Energy of SNN (mJ): {energy / 1e9 *0.9:>7.3f}  "
-        )
+
         return metrics
     return
 
