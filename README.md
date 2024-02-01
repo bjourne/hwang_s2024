@@ -2,8 +2,9 @@
 ## What is?
 This is simple test code for All-Spikeformer which submit to ICML 2024.
 Beacuse of limitation of supplement and annonymity, one of pre-trained ANN(swin-tiny without ReLU) is uploaded on below google drive
-* new google account created for sharing (account name is Allspikeformer)
-https://drive.google.com/file/d/1SsV4KjJdISWiII378TgArzgT0ZQ-KixF/view?pli=1
+* new annonymous google account created for sharing (account name is Allspikeformer)
+
+link for pretrained ANN: https://drive.google.com/file/d/1SsV4KjJdISWiII378TgArzgT0ZQ-KixF/view?pli=1
 
 In the case paper is accepted, we will provide online resource.
 
@@ -20,12 +21,12 @@ torchrun --nproc_per_node "num_of_gpu" main_distributed.py "data_path of ImageNe
 
 Hyper Parameter:
 1. Number of Timestep (-t)   (Default: 40)
-2. Base B (1,2] *if q=2, it is binary coding (Default: 1.16)
+2. Base B (1,2] *if B=2, it is binary coding (Default: 1.16)
 
 
-For example, if you want to get result of "resnet18" with full-wait from paper, run
+For example, run
 ```
-torchrun --nproc_per_node 4 main_distributed.py /workspace/dataset/imagenet --model swin_tiny_patch4_window7_224 --batch-size 64 --resume model_best.pth.tar --base 4\1.16 --timestep 40
+torchrun --nproc_per_node 4 main_distributed.py /workspace/dataset/imagenet --model swin_tiny_patch4_window7_224 --batch-size 64 --resume model_best.pth.tar --base 1.16 --timestep 40
 ```
 
 
