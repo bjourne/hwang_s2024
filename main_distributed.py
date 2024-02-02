@@ -441,7 +441,6 @@ def validate(
             f"number of GFLOPs: {flops / 1e9:>7.3f}  "
             f"ANN Energy (mJ): {flops / 1e9 * 4.6:>7.3f}  "
         )
-        logger.info(f"Searched Optimal Base: {args.base}  ")
 
 
         return metrics
@@ -471,6 +470,9 @@ def snn_validate(
     model, i_layer_bias, i_layer_mean = modif_bias(model, timestep, base, 0, 0)
     if utils.is_primary(args):
         logger.info("Embed Spiking Neuron on each layer")
+        logger.info(f"Base of SNN: {args.base}  ")
+        logger.info(f"total timesteps of SNN: {args.timestep}  ")
+
         logger.info("Validate All-Spikeformer: Accuracy and Energy")
 
     model.eval()
