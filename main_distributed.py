@@ -367,7 +367,7 @@ def validate(
 ):
     if utils.is_primary(args):
         logger.info(
-            "Run pre-trained Model(ANN) with searching optimal Base and Maximum(M_z)")
+            "#1: Run pre-trained Model(ANN) ")
 
     batch_time_m = utils.AverageMeter()
     losses_m = utils.AverageMeter()
@@ -418,13 +418,7 @@ def validate(
                     f'Acc@1: {top1_m.val:>7.3f} ({top1_m.avg:>7.3f})  '
                     f'Acc@5: {top5_m.val:>7.3f} ({top5_m.avg:>7.3f})'
                 )
-                print(
-                    f'{log_name}: [{batch_idx:>4d}/{last_idx}]  '
-                    f'Time: {batch_time_m.val:.3f} ({batch_time_m.avg:.3f})  '
-                    f'Loss: {losses_m.val:>7.3f} ({losses_m.avg:>6.3f})  '
-                    f'Acc@1: {top1_m.val:>7.3f} ({top1_m.avg:>7.3f})  '
-                    f'Acc@5: {top5_m.val:>7.3f} ({top5_m.avg:>7.3f})'
-                )
+
     if utils.is_primary(args):
 
         metrics = OrderedDict(
