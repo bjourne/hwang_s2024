@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from modules_neuron import StraightThrough, WTA_layer_Neuron, MCN, ScaledNeuron_onespike_time_bipolar, ScaledNeuron_onespike_time_relu, ScaledNeuron_onespike_time_double
+from modules_neuron import StraightThrough, WTA_layer_Neuron, MCN, ScaledNeuron_onespike_time_bipolar, ScaledNeuron_onespike_time_relu
 
 
 def isActivation(name):
@@ -39,29 +39,6 @@ def replace_identity_by_module(model, i_layer, batch_size):
                 model._modules[name].relu_bool = True
     return model, i_layer
 
-# def replace_activation_by_module(model, m):
-#     for name, module in model._modules.items():
-#         if hasattr(module, "_modules"):
-#             model._modules[name] = replace_activation_by_module(module, m)
-#         if isActivation(module.__class__.__name__.lower()):
-#             if hasattr(module, "up"):
-#                 model._modules[name] = m(module.up.item())
-#             else:
-#                 model._modules[name] = m()
-#     return model
-
-
-# def replace_activation_by_neuron(model):
-#     for name, module in model._modules.items():
-#         if hasattr(module, "_modules"):
-#             model._modules[name] = replace_activation_by_neuron(module)
-#         if isActivation(module.__class__.__name__.lower()):
-#             if hasattr(module, "up"):
-#                 model._modules[name] = ScaledNeuron_onespike(scale=module.up.item())
-#             else:
-#                 model._modules[name] = ScaledNeuron_onespike(scale=1.)
-
-#     return model
 
 def replace_MCN_by_neuron_wait(model, timestep, wait, n_layer, tau):
 
