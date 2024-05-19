@@ -93,6 +93,44 @@ class PatchEmbed(nn.Module):
         return x
 
 
+def SpikeSim_Energy(flop, time_steps, ratio,potential_ratio,weight_num):
+    # ratio =1
+
+    N_rd = flop
+    N_neuron = flop/weight_num
+    E_ad = 0.9 ##0.03
+    E_mul = 3.7 ##0.2
+    E_mem = 5.00#1.25
+
+    E_rd = N_rd* (E_mem*33/32)*ratio
+    E_acc = N_rd * E_ad*ratio
+    
+    E_state = (E_mem + E_mul + E_ad + E_ad + E_ad + E_mem)*N_neuron*potential_ratio
+    E_offmap = (E_mem/32)*N_neuron*potential_ratio
+
+    E_snn = E_rd + E_acc + E_state + E_offmap
+
+    return E_snn
+
+def ANN_Energy(flop, weight_num,sparsity):
+    # sparsity =1
+    N_rd = flop
+    N_neuron = flop/weight_num
+    E_ad = 0.9 ##0.03
+    E_mul = 3.7 ##0.2
+    E_mem = 5.00#1.25
+
+    E_rd = N_rd* (E_mem*2) *sparsity
+    E_acc = N_rd * (E_ad+E_mul) *sparsity
+    E_offmap = (E_mem)*N_neuron
+
+    E_snn = E_rd + E_acc +  E_offmap
+
+    return E_snn
+
+
+
+
 class batch_PatchEmbed(nn.Module):
     """ 2D Image to Patch Embedding
     """
@@ -133,7 +171,7 @@ class batch_PatchEmbed(nn.Module):
             self.output_fmt = Format.NCHW
         self.strict_img_size = strict_img_size
         self.dynamic_img_pad = dynamic_img_pad
-
+        self.timestep =0
         self.proj = nn.Conv2d(in_chans, embed_dim, kernel_size=patch_size, stride=patch_size, bias=bias)
         self.norm = norm_layer(embed_dim) if norm_layer else nn.Identity()
         self.norm_layer = norm_layer
@@ -191,13 +229,27 @@ class batch_PatchEmbed(nn.Module):
         if self.norm is not None:
             flops += self.num_patches * self.embed_dim
         return flops
+    def flops_snn(self, input_ratio):
+        flops=0
+        # Ho, Wo = self.patches_resolution
+        flops += SpikeSim_Energy(self.num_patches * self.embed_dim * self.in_chans * (self.patch_size[0] * self.patch_size[1]),self.timestep, input_ratio, self.patch_embed_if.mem_count_meter.avg,self.num_patches * self.embed_dim  )
 
-    def flops_snn(self,input_ratio):
+        return flops,self.patch_embed_if.spike_count_meter.avg
+
+    def flops_ANN(self,input_ratio):
+        flops=0
+        # Ho, Wo = self.patches_resolution
+        flops += ANN_Energy(self.num_patches * self.embed_dim * self.in_chans * (self.patch_size[0] * self.patch_size[1]),self.num_patches * self.embed_dim,input_ratio  )
+
+        return flops,self.patch_embed_if.spike_count_meter.avg
+
+
+    def flops_snn2(self,input_ratio):
         flops=0
         # Ho, Wo = self.patches_resolution
         flops = self.num_patches * self.embed_dim * self.in_chans * (self.patch_size[0] * self.patch_size[1])*input_ratio
 
-        return flops,self.patch_embed_if.spike_count_meter.val
+        return flops,self.patch_embed_if.spike_count_meter.avg
 
 class PatchEmbedWithSize(PatchEmbed):
     """ 2D Image to Patch Embedding

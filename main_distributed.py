@@ -425,15 +425,18 @@ def validate(
             [('loss', losses_m.avg), ('top1', top1_m.avg), ('top5', top5_m.avg)])
         log_name = 'Pre-trained ANN Performance' + log_suffix
         if args.distributed:
-            flops = model.module.flops()
+            energy = model.module.flops_ANN(1.0)
+            flops = model.module.flops()            
         else:
-            flops = model.flops()
+            flops = model.flops_ANN(1.0)
+            flops = model.flops(1.0)            
         logger.info(
             f'{log_name}:  '
             f'Acc@1: {top1_m.avg:>7.3f}  '
             f'Acc@5: {top5_m.avg:>7.3f}  '
-            f"number of GFLOPs: {flops / 1e9:>7.3f}  "
-            f"ANN Energy (mJ): {flops / 1e9 * 4.6:>7.3f}  "
+            f"number of GFLOPs: {flops / 1e9 :>7.3f}  "
+            f"SynOP ANN Energy (mJ): {flops*4.6 / 1e9 :>7.3f}  "
+            f"Total ANN Energy (mJ): {energy / 1e9 :>7.3f}  "
         )
 
 
@@ -460,13 +463,12 @@ def snn_validate(
 
     base = float(args.base)
 
-    model, n_layer = replace_MCN_by_neuron_wait(model, timestep, wait, 0, base)
+    model, n_layer = replace_ANN_neruon_by_neuron_wait(model, timestep, wait, 0, base)
     model, i_layer_bias, i_layer_mean = modif_bias(model, timestep, base, 0, 0)
     if utils.is_primary(args):
         logger.info("Embed Spiking Neuron on each layer")
         logger.info(f"Base of SNN: {args.base}  ")
         logger.info(f"total timesteps of SNN: {args.timestep}  ")
-
         logger.info("Validate All-Spikeformer: Accuracy and Energy")
 
     model.eval()
@@ -525,12 +527,21 @@ def snn_validate(
             batch_time_m.update(time.time() - end)
             end = time.time()
             if utils.is_primary(args) and (last_batch or batch_idx % args.log_interval == 0):
+                if args.distributed:
+                    energy = model.module.flops_snn(input_count_meter.avg)
+                    flops = model.module.flops_snn2(input_count_meter.avg)
+
+                else:
+                    energy = model.flops_snn(input_count_meter.avg)
+                    flops = model.flops_snn2(input_count_meter.avg)                
                 log_name = 'SNN' + log_suffix
                 logger.info(
                     f'{log_name}: [{batch_idx:>4d}/{last_idx}]  '
                     f'Time: {batch_time_m.val:.3f} ({batch_time_m.avg:.3f})  '
                     f'Acc@1: {top1_m.val:>7.3f} ({top1_m.avg:>7.3f})  '
                     f'Acc@5: {top5_m.val:>7.3f} ({top5_m.avg:>7.3f})'
+                    f"SynOP ANN Energy (mJ): {flops *0.9 / 1e9 :>7.3f}  "
+                    f"Total ANN Energy (mJ): {energy / 1e9 :>7.3f}  "
                 )
 
             if (top1_m.avg < 10):
@@ -542,15 +553,21 @@ def snn_validate(
         log_name = 'Converted All-Spikeformer performance' + log_suffix
         if args.distributed:
             energy = model.module.flops_snn(input_count_meter.avg)
+            flops = model.module.flops_snn2(input_count_meter.avg)
+
         else:
             energy = model.flops_snn(input_count_meter.avg)
+            flops = model.flops_snn2(input_count_meter.avg)
+
 
         metrics = OrderedDict([('top1', top1_m.avg), ('top5', top5_m.avg)])
         logger.info(
-            f'{log_name}:  '
-            f'Acc@1: {top1_m.avg:>7.3f}  '
-            f'Acc@5: {top5_m.avg:>7.3f}  '
-            f"Energy of SNN (mJ): {energy / 1e9 *0.9:>7.3f}  "
+                    f'{log_name}: [{batch_idx:>4d}/{last_idx}]  '
+                    f'Time: {batch_time_m.val:.3f} ({batch_time_m.avg:.3f})  '
+                    f'Acc@1: {top1_m.val:>7.3f} ({top1_m.avg:>7.3f})  '
+                    f'Acc@5: {top5_m.val:>7.3f} ({top5_m.avg:>7.3f})'
+                    f"SynOP ANN Energy (mJ): {flops *0.9 / 1e9 :>7.3f}  "
+                    f"Total ANN Energy (mJ): {energy / 1e9 :>7.3f}  "
         )
 
         return metrics

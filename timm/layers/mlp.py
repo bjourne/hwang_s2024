@@ -47,6 +47,87 @@ class Mlp(nn.Module):
         x = self.drop2(x)
         return x
 
+
+
+def SpikeSim_Energy(flop, time_steps, ratio,potential_ratio,weight_num):
+    # ratio =1
+
+    N_rd = flop
+    N_neuron = flop/weight_num
+    E_ad = 0.9 ##0.03
+    E_mul = 3.7 ##0.2
+    E_mem = 5.00#1.25
+
+    E_rd = N_rd* (E_mem*33/32)*ratio
+    E_acc = N_rd * E_ad*ratio
+
+    E_state = (E_mem + E_mul + E_ad + E_ad + E_ad + E_mem)*N_neuron*potential_ratio
+    E_offmap = (E_mem/32)*N_neuron*potential_ratio
+
+    E_snn = E_rd + E_acc + E_state + E_offmap
+
+    return E_snn
+
+def ANN_Energy(flop, weight_num,sparsity):
+    # sparsity =1
+    N_rd = flop
+    N_neuron = flop/weight_num
+    E_ad = 0.9 ##0.03
+    E_mul = 3.7 ##0.2
+    E_mem = 5.00#1.25
+
+    E_rd = N_rd* (E_mem*2) *sparsity
+    E_acc = N_rd * (E_ad+E_mul) *sparsity
+    E_offmap = (E_mem)*N_neuron
+
+    E_snn = E_rd + E_acc +  E_offmap
+
+    return E_snn
+
+# def SpikeSim_Energy(flop, time_steps, ratio,potential_ratio,weight_num):
+#     xbar_ar = 1.76423
+
+#     Tile_buff = 397
+#     Temp_Buff = 0.2
+#     Sub = 1.15E-6
+#     ADC = 2.03084
+#     xbar_size =64
+#     Htree = 19.64 * 8  # 4.912*4 3.11E+6/30.*0.25
+#     # Include PE dependent HTree
+#     MUX = 0.094245
+#     mem_fetch = 4.64
+#     neuron = 1.274 * 4.0
+#     num_xbar =9
+#     PE_ar = (num_xbar * xbar_ar + (xbar_size / 8) * (ADC + MUX)+ (xbar_size / 8) * 16 * Sub+ Htree)#*ratio/time_steps
+#     PE_cycle_energy = (xbar_size / 8 * PE_ar + (xbar_size / 8) * Temp_Buff + Tile_buff+ (xbar_size / 8) * 16 * Sub+ Htree )*2/weight_num#*potential_ratio/time_steps
+#                 ## 8로 나누는 이유는 ADC 비트 때문에 그러는듯. 
+    
+#     PE_cycle_energy +=(mem_fetch + neuron )*potential_ratio/time_steps/weight_num
+#     Total_PE_cycle = (flop / xbar_size)/xbar_size
+#     tot_energy = Total_PE_cycle * PE_cycle_energy* time_steps
+    # xbar_ar = 1.76423
+
+    # Tile_buff = 397
+    # Temp_Buff = 0.2
+    # Sub = 1.15E-6
+    # ADC = 2.03084
+    # xbar_size =64
+    # Htree = 19.64 * 8  # 4.912*4 3.11E+6/30.*0.25
+    # # Include PE dependent HTree
+    # MUX = 0.094245
+    # mem_fetch = 0#4.64
+    # neuron = 0#1.274 * 4.0
+    # num_xbar =9
+    # PE_ar = (num_xbar * xbar_ar + (xbar_size / 8) * (ADC + MUX))#*ratio/time_steps
+    # PE_cycle_energy = (xbar_size / 8 * PE_ar + (xbar_size / 8) * Temp_Buff + Tile_buff+ (xbar_size / 8) * 16 * Sub+ Htree )*2#*ratio/time_steps
+    #             ## 8로 나누는 이유는 ADC 비트 때문에 그러는듯. 
+    
+    # PE_cycle_energy +=(mem_fetch + neuron )#*potential_ratio/time_steps
+    # Total_PE_cycle = (flop / xbar_size)/xbar_size
+    # tot_energy = Total_PE_cycle * PE_cycle_energy*8#* time_steps
+
+    return tot_energy
+
 class Batch_Mlp(nn.Module):
     """ MLP as used in Vision Transformer, MLP-Mixer and related networks
     """
@@ -77,6 +158,7 @@ class Batch_Mlp(nn.Module):
         self.hidden_features =hidden_features
         self.in_feature = in_features
         self.out_features = out_features
+        self.timestep = 0
 
         # self.fc1_if = nn.Identity()
 
@@ -99,9 +181,26 @@ class Batch_Mlp(nn.Module):
         return x
     def flops_snn(self,input_ratio,H,W):
         flops =0
+        flops += SpikeSim_Energy(H * W * self.in_feature * self.hidden_features,self.timestep, input_ratio, self.act.mem_count_meter.avg,self.in_feature )
+
+        # flops += SpikeSim_Energy(H * W * self.out_features * self.hidden_features,self.timestep, self.act.spike_count_meter.avg, self.mlp_if.mem_count_meter.avg,self.hidden_features )
+        return flops,self.act.spike_count_meter.avg#,H * W * self.out_features * self.hidden_features,self.hidden_features
+
+
+    def flops_ANN(self,H,W,input_ratio):
+        flops =0
+        flops += ANN_Energy(H * W * self.in_feature * self.hidden_features,self.in_feature ,input_ratio)
+
+        # flops += ANN_Energy(H * W * self.out_features * self.hidden_features,self.hidden_features ,self.act.spike_count_meter.avg)
+        return flops,self.act.spike_count_meter.avg#,H * W * self.out_features * self.hidden_features,self.hidden_features
+
+
+    def flops_snn2(self,input_ratio,H,W):
+        flops =0
         flops += H * W * self.in_feature * self.hidden_features*input_ratio
-        flops += H * W * self.out_features * self.hidden_features *self.act.spike_count_meter.val
-        return flops,self.act.spike_count_meter.val
+        flops += H * W * self.out_features * self.hidden_features *self.act.spike_count_meter.avg
+        return flops,self.act.spike_count_meter.avg
+
 
 
 
@@ -155,11 +254,32 @@ class Batch_Mlp_relu(nn.Module):
             x = self.drop2(x)
         # x = self.fc1_if(x)
         return x
+    # def flops_snn(self,input_ratio,H,W):
+    #     flops =0
+    #     flops += H * W * self.in_feature * self.hidden_features*input_ratio
+    #     flops += H * W * self.out_features * self.hidden_features *self.act.spike_count_meter.val
+    #     return flops,self.act.spike_count_meter.val
     def flops_snn(self,input_ratio,H,W):
+        flops =0
+        flops += SpikeSim_Energy(H * W * self.in_feature * self.hidden_features,1, input_ratio, self.act.mem_count_meter.avg,self.in_feature )
+
+        # flops += SpikeSim_Energy(H * W * self.out_features * self.hidden_features,1, self.act.spike_count_meter.avg, 1,self.hidden_features )
+        return flops,self.act.spike_count_meter.avg#,H * W * self.out_features * self.hidden_features,self.hidden_features
+
+    def flops_snn2(self,input_ratio,H,W):
         flops =0
         flops += H * W * self.in_feature * self.hidden_features*input_ratio
         flops += H * W * self.out_features * self.hidden_features *self.act.spike_count_meter.val
-        return flops,self.act.spike_count_meter.val
+        return flops,self.act.spike_count_meter.avg
+    def flops_ANN(self,H,W,input_ratio):
+        flops =0
+        flops += ANN_Energy(H * W * self.in_feature * self.hidden_features,self.in_feature ,input_ratio)
+
+        # flops += ANN_Energy(H * W * self.out_features * self.hidden_features,self.hidden_features ,self.act.spike_count_meter.avg)
+        return flops,self.act.spike_count_meter.avg#,H * W * self.out_features * self.hidden_features,self.hidden_features
+
+
+
 
 
 

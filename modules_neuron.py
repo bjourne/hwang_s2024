@@ -25,6 +25,7 @@ class MCN(nn.Module):
         self.name = None
         self.full_scale = False
         self.batch_fusion_bool = False
+        self.spike_count_meter = AverageMeter()
 
     def forward(self, x):
 
@@ -79,6 +80,7 @@ class MCN(nn.Module):
                 else:
                     self.max_act = torch.maximum(x.abs().max(
                         0).values.max(-1).values, self.max_act)
+        self.spike_count_meter.update(torch.count_nonzero(x)/(x.flatten()).size()[0])
 
         return x
 
@@ -127,7 +129,10 @@ class ScaledNeuron_onespike_time_relu(nn.Module):
         self.md_shape = None
 
         self.spike_count_meter = AverageMeter()
+        self.mem_count_meter = AverageMeter()
+
         self.spike_counts = 0
+        self.mem_counts = 0
 
     def forward(self, x):
         if (x is not None):
@@ -144,7 +149,7 @@ class ScaledNeuron_onespike_time_relu(nn.Module):
             if self.initialize == False:
                 self.stdp_scale = 1
                 self.spike_counts = 0
-
+                self.mem_counts = 0
                 self.neuron(torch.zeros_like(x))
                 self.block = torch.zeros_like(x)
                 self.x_sign = torch.zeros_like(x)
@@ -187,11 +192,9 @@ class ScaledNeuron_onespike_time_relu(nn.Module):
 
         if (x is not None):
             self.spike_counts += torch.count_nonzero(x)/(x.flatten()).size()[0]
-
+            self.mem_counts += (1-self.block).sum()/(x.flatten()).size()[0]
             if (self.x_shape is not None):
-
                 return (x * self.scale).view(self.x_shape)
-
             else:
                 return x * self.scale
         else:
@@ -212,8 +215,10 @@ class ScaledNeuron_onespike_time_relu(nn.Module):
         self.neuron.v = 0.0
         self.x_sign = None
         self.stdp_scale = 1
-        if (self.spike_counts > 0):
-            self.spike_count_meter.update(self.spike_counts)
+        self.spike_count_meter.update(self.spike_counts)
+        self.mem_count_meter.update(self.mem_counts)
+        self.spike_counts = 0
+        self.mem_counts=0
         self.spike_counts = 0
         self.initialize = False
 
@@ -262,12 +267,12 @@ class ScaledNeuron_onespike_time_bipolar(nn.Module):
         self.x_shape = None
         self.md_shape = None
         self.spike_count_meter = AverageMeter()
+        self.mem_count_meter = AverageMeter()
         self.spike_counts = 0
+        self.mem_counts = 0
 
     def forward(self, x):
-
         if (x is not None):
-
             if (len(x.shape) != len(self.scale.shape)):
                 if self.initialize == False:
                     self.x_shape = x.size()
@@ -280,7 +285,7 @@ class ScaledNeuron_onespike_time_bipolar(nn.Module):
             if self.initialize == False:
                 self.stdp_scale = 1
                 self.spike_counts = 0
-
+                self.mem_counts = 0
                 self.neuron(torch.zeros_like(x))
                 self.block = torch.zeros_like(x)
                 self.x_sign = torch.zeros_like(x)
@@ -332,7 +337,7 @@ class ScaledNeuron_onespike_time_bipolar(nn.Module):
 
         if (x is not None):
             self.spike_counts += torch.count_nonzero(x)/(x.flatten()).size()[0]
-
+            self.mem_counts += (1-self.block).sum()/(x.flatten()).size()[0]
             if (self.x_shape is not None):
 
                 return (x * self.scale).view(self.x_shape)
@@ -357,9 +362,10 @@ class ScaledNeuron_onespike_time_bipolar(nn.Module):
         self.neuron.v = 0.0
         self.x_sign = None
         self.stdp_scale = 1
-        if (self.spike_counts > 0):
-            self.spike_count_meter.update(self.spike_counts)
+        self.spike_count_meter.update(self.spike_counts)
+        self.mem_count_meter.update(self.mem_counts)
         self.spike_counts = 0
+        self.mem_counts = 0
         self.initialize = False
 
 
@@ -401,7 +407,10 @@ class WTA_layer_Neuron(nn.Module):
         self.spike_sum_max = None
         self.x_sign = None
         self.spike_count_meter = AverageMeter()
+        self.mem_count_meter = AverageMeter()
+        self.mem_counts =0
         self.spike_counts = 0
+
 
     def forward(self, x):
 
@@ -410,10 +419,9 @@ class WTA_layer_Neuron(nn.Module):
                 self.neuron(torch.zeros_like(x))
                 self.accum_neuron(torch.zeros_like(x.sum(-1)))
                 self.spike_counts = 0
-
+                self.mem_counts =0
                 self.block = torch.zeros_like(x)
                 self.block_input = torch.ones_like(x.max(-1).values)
-
                 self.trace_v = 0
                 self.spike_sum = 0
 
@@ -452,6 +460,7 @@ class WTA_layer_Neuron(nn.Module):
 
         if (x is not None):
             self.spike_counts += torch.count_nonzero(x)/(x.flatten()).size()[0]
+            self.mem_counts += (1-self.block).sum()/(x.flatten()).size()[0]
             return x
         else:
             return None
@@ -469,9 +478,10 @@ class WTA_layer_Neuron(nn.Module):
         self.block_input = 0
         self.neuron.reset()
         self.accum_neuron.reset()
-        if (self.spike_counts > 0):
-            self.spike_count_meter.update(self.spike_counts)
+        self.spike_count_meter.update(self.spike_counts)
+        self.mem_count_meter.update(self.mem_counts)
         self.spike_counts = 0
+        self.mem_counts=0
         self.neuron.v_threshold = self.reset_threshold
         self.neuron.v = 0.0
         self.initialize = False

@@ -95,6 +95,36 @@ def get_relative_position_index(win_h: int, win_w: int):
     return relative_coords.sum(-1)  # Wh*Ww, Wh*Ww
 
 
+def SpikeSim_Energy(flop, time_steps, ratio,potential_ratio,weight_num):
+    N_rd = flop
+    N_neuron = flop/weight_num
+    E_ad = 0.9 ##0.03
+    E_mul = 3.7 ##0.2
+    E_mem = 5.00#1.25
+    E_rd = N_rd* (E_mem*33/32)*ratio
+    E_acc = N_rd * E_ad*ratio
+
+    E_state = (E_mem + E_mul + E_ad + E_ad + E_ad + E_mem)*N_neuron*potential_ratio
+    E_offmap = (E_mem/32)*N_neuron*potential_ratio
+    E_snn = E_rd + E_acc + E_state + E_offmap
+    return E_snn
+
+def ANN_Energy(flop, weight_num,sparsity):
+    sparsity =1
+    N_rd = flop
+    N_neuron = flop/weight_num
+    E_ad = 0.9 ##0.03
+    E_mul = 3.7 ##0.2
+    E_mem = 5.00#1.25
+
+    E_rd = N_rd* (E_mem*2) *sparsity
+    E_acc = N_rd * (E_ad+E_mul) *sparsity
+    E_offmap = (E_mem)*N_neuron
+
+    E_snn = E_rd + E_acc +  E_offmap
+
+    return E_snn
+
 class WindowAttention(nn.Module):
     """ Window based multi-head self attention (W-MSA) module with relative position bias.
     It supports shifted and non-shifted windows.
@@ -129,6 +159,7 @@ class WindowAttention(nn.Module):
         self.num_heads = num_heads
         head_dim = head_dim or dim // num_heads
         attn_dim = head_dim * num_heads
+        self.attn_dim = attn_dim
         self.scale = head_dim ** -0.5
         # NOTE not tested for prime-time yet
         self.fused_attn = use_fused_attn(experimental=True)
@@ -303,7 +334,40 @@ class WindowAttention(nn.Module):
         flop += N*self.dim*self.dim
         return flop
 
+    def flops_ANN(self, N, input_ratio):
+        flop = 0
+        flop += ANN_Energy(N*self.dim * self.dim,self.dim,input_ratio)
+        flop += ANN_Energy(N*self.dim * self.dim,self.dim,input_ratio)
+        flop += ANN_Energy(N*self.dim * self.dim,self.dim,input_ratio)
+
+        flop+=ANN_Energy(self.num_heads * N * (self.dim//self.num_heads) * N,(self.dim//self.num_heads),self.q_if.spike_count_meter.avg*self.k_if.spike_count_meter.avg)
+
+        flop+=ANN_Energy(self.num_heads*N*N*(self.dim//self.num_heads),N ,self.softmax_if.spike_count_meter.avg *self.v_if.spike_count_meter.avg)
+
+        return flop, N*self.dim*self.dim,self.stdp_av.spike_count_meter.avg,N*self.dim*self.dim/self.attn_dim
+
     def flops_snn(self, N, input_ratio):
+        flop = 0
+        flop += SpikeSim_Energy(N*self.dim * self.dim,self.timestep,input_ratio,self.q_if.mem_count_meter.avg,self.dim)
+        flop += SpikeSim_Energy(N*self.dim * self.dim,self.timestep,input_ratio,self.k_if.mem_count_meter.avg,self.dim)
+        flop += SpikeSim_Energy(N*self.dim * self.dim,self.timestep,input_ratio,self.v_if.mem_count_meter.avg,self.dim)
+
+        # flop += N*self.dim * 3*self.dim*input_ratio  # q,k,v
+
+        flop+=SpikeSim_Energy(self.num_heads * N * (self.dim//self.num_heads) * N,self.timestep,self.q_if.spike_count_meter.avg*self.k_if.spike_count_meter.avg,self.softmax_if.mem_count_meter.avg,(self.dim//self.num_heads))
+        #flop += self.num_heads * N * (self.dim//self.num_heads) * N * \
+        #    self.q_if.spike_count_meter.avg*self.k_if.spike_count_meter.avg  # QK^T
+        
+        flop+=SpikeSim_Energy(self.num_heads*N*N*(self.dim//self.num_heads),self.timestep, self.softmax_if.spike_count_meter.avg *self.v_if.spike_count_meter.avg, self.stdp_av.mem_count_meter.avg,N )
+        # flop += self.num_heads*N*N * \
+        #     (self.dim//self.num_heads)*self.softmax_if.spike_count_meter.avg * \
+        #     self.v_if.spike_count_meter.avg  # attn@V
+        # flop+=SpikeSim_Energy(N*self.dim*self.dim,self.timestep, self.stdp_av.spike_count_meter.avg, self.proj.mem_count_meter.avg )
+
+        # flop += N*self.dim*self.dim * self.stdp_av.spike_count_meter.avg
+        return flop, N*self.dim*self.dim,self.stdp_av.spike_count_meter.avg,N*self.dim*self.dim/self.attn_dim
+
+    def flops_snn2(self, N, input_ratio):
         flop = 0
         flop += N*self.dim * 3*self.dim*input_ratio  # q,k,v
         flop += self.num_heads * N * (self.dim//self.num_heads) * N * \
@@ -360,6 +424,7 @@ class SwinTransformerBlock(nn.Module):
         self.window_area = self.window_size[0] * self.window_size[1]
         self.mlp_ratio = mlp_ratio
         self.snn_mode = False
+        self.timestep = 0
 
         self.norm1 = nn.BatchNorm2d(dim)
         self.norm1_if = nn.Identity()
@@ -566,7 +631,60 @@ class SwinTransformerBlock(nn.Module):
         flops += self.dim * H * W
         return flops
 
+    def flops_ANN(self,input_ratio):
+        flops = 0
+        H, W = self.input_resolution
+        # norm1
+        flops +=ANN_Energy(self.dim * H * W,1,input_ratio )
+        ##ambigious
+        # flops += self.dim * H * W*input_ratio
+        # W-MSA/SW-MSA
+        nW = H * W / self.window_area
+
+        tp_flops,a,b,c = self.attn.flops_ANN(self.window_area,self.norm1_if.spike_count_meter.avg)
+        
+        flops += tp_flops *nW
+        flops +=ANN_Energy(a,c,b )*nW
+
+        # mlp
+        flops_tp,mlp_ratio = self.mlp.flops_ANN(
+             H, W,self.norm2_if.spike_count_meter.avg)
+        flops += flops_tp
+        # norm2
+        # flops += self.dim * H * W*mlp_ratio
+        flops +=ANN_Energy(self.dim * H * W,1,mlp_ratio )
+
+        return flops, self.final_if.spike_count_meter.avg
+
+
+
     def flops_snn(self, input_ratio):
+        flops = 0
+        H, W = self.input_resolution
+        # norm1
+        flops +=SpikeSim_Energy(self.dim * H * W,self.timestep, input_ratio, self.norm1_if.mem_count_meter.avg,1 )
+        ##ambigious
+        # flops += self.dim * H * W*input_ratio
+        # W-MSA/SW-MSA
+        nW = H * W / self.window_area
+
+        tp_flops,a,b,c = self.attn.flops_snn(self.window_area, self.norm1_if.spike_count_meter.avg)
+        
+        flops += tp_flops *nW
+        flops +=SpikeSim_Energy(a,self.timestep, b, self.attn_if.mem_count_meter.avg,c )*nW
+
+        # mlp
+        flops_tp, mlp_ratio = self.mlp.flops_snn(
+            self.norm2_if.spike_count_meter.avg, H, W)
+        flops += flops_tp
+        # norm2
+        # flops += self.dim * H * W*mlp_ratio
+        flops +=SpikeSim_Energy(self.dim * H * W,self.timestep, mlp_ratio, self.final_if.mem_count_meter.avg,1 )
+
+        return flops, self.final_if.spike_count_meter.avg
+
+
+    def flops_snn2(self, input_ratio):
         flops = 0
         H, W = self.input_resolution
         # norm1
@@ -574,10 +692,10 @@ class SwinTransformerBlock(nn.Module):
         # W-MSA/SW-MSA
         nW = H * W / self.window_area
         flops += nW * \
-            self.attn.flops_snn(
+            self.attn.flops_snn2(
                 self.window_area, self.norm1_if.spike_count_meter.avg)
         # mlp
-        flops_tp, mlp_ratio = self.mlp.flops_snn(
+        flops_tp, mlp_ratio = self.mlp.flops_snn2(
             self.norm2_if.spike_count_meter.avg, H, W)
         flops += flops_tp
         # norm2
@@ -606,6 +724,7 @@ class PatchMerging(nn.Module):
         self.snn_mode = False
         self.H = 0
         self.W = 0
+        self.timestep = 0
 
         self.out_dim = out_dim or 2 * dim
         self.norm = nn.BatchNorm2d(4 * dim)
@@ -639,12 +758,32 @@ class PatchMerging(nn.Module):
         flops += (H // 2) * (W // 2) * 4 * self.dim * 2 * self.dim
         return flops
 
-    def flops_snn(self, input_ratio):
+    def flops_snn2(self, input_ratio):
         flops = 0
         H = self.H
         W = self.W
         flops = H*W * self.dim
         flops += (H // 2) * (W // 2) * 4 * self.dim * 2 * self.dim*input_ratio
+        return flops, self.patch_merging_if.spike_count_meter.avg
+
+    def flops_snn(self, input_ratio):
+        flops = 0
+        H = self.H
+        W = self.W
+        # flops = H*W * self.dim
+        flops +=SpikeSim_Energy((H // 2) * (W // 2) * 4 * self.dim * 2 * self.dim,self.timestep, input_ratio, self.patch_merging_if.mem_count_meter.avg,(4 * self.dim) )
+
+        # flops += (H // 2) * (W // 2) * 4 * self.dim * 2 * self.dim*input_ratio
+        return flops, self.patch_merging_if.spike_count_meter.avg
+
+    def flops_ANN(self,input_ratio):
+        flops = 0
+        H = self.H
+        W = self.W
+        # flops = H*W * self.dim
+        flops +=ANN_Energy((H // 2) * (W // 2) * 4 * self.dim * 2 * self.dim,(4 * self.dim),input_ratio )
+
+        # flops += (H // 2) * (W // 2) * 4 * self.dim * 2 * self.dim*input_ratio
         return flops, self.patch_merging_if.spike_count_meter.avg
 
 
@@ -695,6 +834,7 @@ class SwinTransformerStage(nn.Module):
         window_size = to_2tuple(window_size)
         shift_size = tuple([w // 2 for w in window_size])
         self.snn_mode = False
+        self.timestep = 0
 
         # patch merging layer
         if downsample:
@@ -753,11 +893,32 @@ class SwinTransformerStage(nn.Module):
         for blk in self.blocks:
             flops_blk, ratio = blk.flops_snn(ratio)
             flops += flops_blk
+            
         if self.downsample_bool:
             flops_down, ratio = self.downsample.flops_snn(ratio)
             flops += flops_down
         return flops, ratio
 
+    def flops_ANN(self,ratio):
+        flops = 0
+        for blk in self.blocks:
+            flops_blk,ratio = blk.flops_ANN(ratio)
+            flops += flops_blk
+            
+        if self.downsample_bool:
+            flops_down,ratio = self.downsample.flops_ANN(ratio)
+            flops += flops_down
+        return flops,ratio
+
+    def flops_snn2(self, ratio):
+        flops = 0
+        for blk in self.blocks:
+            flops_blk, ratio = blk.flops_snn2(ratio)
+            flops += flops_blk
+        if self.downsample_bool:
+            flops_down, ratio = self.downsample.flops_snn2(ratio)
+            flops += flops_down
+        return flops, ratio
 
 class SwinTransformer(nn.Module):
     """ Swin Transformer
@@ -817,6 +978,7 @@ class SwinTransformer(nn.Module):
         self.embed_dim = embed_dim
         self.num_features = int(embed_dim * 2 ** (self.num_layers - 1))
         self.feature_info = []
+        self.timestep = 0
 
         if not isinstance(embed_dim, (tuple, list)):
             embed_dim = [int(embed_dim * 2 ** i)
@@ -873,7 +1035,7 @@ class SwinTransformer(nn.Module):
             self.feature_info += [dict(num_chs=out_dim,
                                        reduction=4 * scale, module=f'layers.{i}')]
         self.layers = nn.Sequential(*layers)
-
+        self.sparsity =1
         self.norm = nn.BatchNorm2d(self.num_features)
         self.last_norm_if = nn.Identity()
         self.head = modified_ClassifierHead(
@@ -926,9 +1088,11 @@ class SwinTransformer(nn.Module):
 
     def forward_features(self, x):
         x = self.patch_embed(x)  # s
-
+ 
         # x = self.norm(x)
         x = self.layers(x)
+        if(self.snn_mode == False):
+            self.sparsity = torch.count_nonzero((x/x.max()*256).round())/(x.flatten()).size()[0]
         # x = self.norm(x)
         # import numpy as np
         # np.savetxt('ann.txt', (x)[0].cpu().flatten().numpy())
@@ -955,7 +1119,25 @@ class SwinTransformer(nn.Module):
             flops += layer.flops()
         flops += self.num_features * self.num_patches // (2 ** self.num_layers)
         flops += self.num_features * self.num_classes
+        return flops*self.sparsity
+
+
+    def flops_ANN(self,ratio):
+        flops = 0
+        flops_tp,ratio = self.patch_embed.flops_ANN(ratio)
+        flops += flops_tp
+        for i, layer in enumerate(self.layers):
+            flops_tp,ratio = layer.flops_ANN(ratio)
+            flops += flops_tp
+
+
+        flops +=ANN_Energy(self.num_features * self.num_patches // (2 ** self.num_layers),(self.num_patches // (2 ** self.num_layers)) ,ratio)
+        # flops += self.num_features * \
+        #     self.num_patches // (2 ** self.num_layers)*ratio
+        flops +=ANN_Energy(self.num_features * self.num_classes ,self.num_features ,self.head.pool_if.spike_count_meter.avg)
+        # assert False, (self.head.pool_if.spike_count_meter.avg, self.last_norm_if.mem_count_meter.avg)
         return flops
+        
 
     def flops_snn(self, ratio):
         flops = 0
@@ -964,12 +1146,27 @@ class SwinTransformer(nn.Module):
         for i, layer in enumerate(self.layers):
             flops_tp, ratio = layer.flops_snn(ratio)
             flops += flops_tp
+
+
+        flops +=SpikeSim_Energy(self.num_features * self.num_patches // (2 ** self.num_layers),self.timestep, ratio, self.head.pool_if.mem_count_meter.avg,(self.num_patches // (2 ** self.num_layers)) )
+        # flops += self.num_features * \
+        #     self.num_patches // (2 ** self.num_layers)*ratio
+        flops +=SpikeSim_Energy(self.num_features * self.num_classes ,self.timestep, self.head.pool_if.spike_count_meter.avg, self.last_norm_if.mem_count_meter.avg,self.num_features )
+        # assert False, (self.head.pool_if.spike_count_meter.avg, self.last_norm_if.mem_count_meter.avg)
+        return flops
+        
+    def flops_snn2(self, ratio):
+        flops = 0
+        flops_tp, ratio = self.patch_embed.flops_snn2(ratio)
+        flops += flops_tp
+        for i, layer in enumerate(self.layers):
+            flops_tp, ratio = layer.flops_snn2(ratio)
+            flops += flops_tp
         flops += self.num_features * \
             self.num_patches // (2 ** self.num_layers)*ratio
         flops += self.num_features * self.num_classes * \
             self.head.pool_if.spike_count_meter.avg
         return flops
-
 
 def checkpoint_filter_fn(state_dict, model):
     """ convert patch embedding weight from manual patchify + linear proj to conv"""
