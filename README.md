@@ -1,6 +1,6 @@
-# All-Spikeformer: An End-to-End Spike-based Vision Transformer with a Winner-Oriented Spike Shift for Softmax Operation
+# Allspiked-Attention: An End-to-End Spike-based Vision Transformer with a Winner-Oriented Spike Shift for Softmax Operation
 ## What is?
-This is simple test code for All-Spikeformer which submit to ICML 2024.
+This is simple test code for Allspiked-Attention which submit to Neurips 2024.
 The code is designed by PyTorch Image Models(TIMM) and SpikingJelly framework.
 Beacuse of limitation of supplement and annonymity, one of pre-trained ANN(swin-tiny without ReLU) is uploaded on below google drive. 
 * new annonymous google account created for sharing (account name is Allspikeformer)

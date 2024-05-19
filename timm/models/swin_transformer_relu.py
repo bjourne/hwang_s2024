@@ -613,25 +613,6 @@ class SwinTransformerBlock(nn.Module):
             x_norm = None
         x_norm = self.norm2_if(x_norm)
 
-        # x_norm = self._attn(x_norm)
-        
-        # if(x_norm is not None ):
-
-        #     if(self.snn_mode):
-        #         x = self.x_queue.pop(0)
-        #         B, H, W, C = x.shape
-
-        #     x = x + self.drop_path1(x_norm)
-        #     x = x.reshape(B, -1, C)
-        #     if(self.snn_mode):
-        #         self.x2_queue.append(x)
-        #     # _assert(False, f"x height ({x.shape}) is not even({self.norm2}).")
-        #     x_norm = self.norm2(x.permute(0,2,1).contiguous()).permute(0, 2,1).contiguous()
-            
-        #     # assert x_norm.all()>=0, "Fcuckckck"
-        
-        # x_norm = self.norm2_if(x_norm)
-
 
         x_norm  = self.mlp(x_norm)
         if(x_norm is not None):

@@ -48,7 +48,7 @@ except ImportError as e:
 has_compile = hasattr(torch, 'compile')
 
 
-logger = logging.getLogger('All-Spikeformer')
+logger = logging.getLogger('Allspiked-Attention')
 
 
 # The first arg parser parses out only the --config argument, this argument is used to
@@ -469,7 +469,7 @@ def snn_validate(
         logger.info("Embed Spiking Neuron on each layer")
         logger.info(f"Base of SNN: {args.base}  ")
         logger.info(f"total timesteps of SNN: {args.timestep}  ")
-        logger.info("Validate All-Spikeformer: Accuracy and Energy")
+        logger.info("Validate Allspiked-Attention: Accuracy and Energy")
 
     model.eval()
 
@@ -550,7 +550,7 @@ def snn_validate(
 
     if utils.is_primary(args):
 
-        log_name = 'Converted All-Spikeformer performance' + log_suffix
+        log_name = 'Converted Allspiked-Attention performance' + log_suffix
         if args.distributed:
             energy = model.module.flops_snn(input_count_meter.avg)
             flops = model.module.flops_snn2(input_count_meter.avg)

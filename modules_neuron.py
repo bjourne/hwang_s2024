@@ -13,7 +13,7 @@ class StraightThrough(nn.Module):
         return input
 
 
-class MCN(nn.Module):
+class ANN_neruon(nn.Module):
     def __init__(self, up=2., t=32, batch_size=64):
         super().__init__()
         self.max_act = 0
