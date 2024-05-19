@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from modules_neuron import StraightThrough, WTA_layer_Neuron, MCN, ScaledNeuron_onespike_time_bipolar, ScaledNeuron_onespike_time_relu
+from modules_neuron import StraightThrough, WTA_layer_Neuron, ANN_neruon, ScaledNeuron_onespike_time_bipolar, ScaledNeuron_onespike_time_relu
 
 
 def isActivation(name):
@@ -29,7 +29,7 @@ def replace_identity_by_module(model, i_layer, batch_size):
 
         if ((module.__class__.__name__ == "Identity" or module.__class__.__name__ == "ReLU") and name != "downsample" and name != "drop_path1" and name != "drop_path2" and name != "flatten"):
 
-            model._modules[name] = MCN(batch_size=batch_size)
+            model._modules[name] = ANN_neruon(batch_size=batch_size)
             model._modules[name].i_layer = i_layer
             model._modules[name].name = name
             if (name != "q_if" and name != "k_if"):
@@ -40,11 +40,11 @@ def replace_identity_by_module(model, i_layer, batch_size):
     return model, i_layer
 
 
-def replace_MCN_by_neuron_wait(model, timestep, wait, n_layer, tau):
+def replace_ANN_neruon_by_neuron_wait(model, timestep, wait, n_layer, tau):
 
     for name, module in model._modules.items():
         if hasattr(module, "_modules"):
-            model._modules[name], n_layer = replace_MCN_by_neuron_wait(
+            model._modules[name], n_layer = replace_ANN_neruon_by_neuron_wait(
                 module, timestep, wait, n_layer, tau)
         if hasattr(module, "snn_mode"):
             model._modules[name].snn_mode = True
