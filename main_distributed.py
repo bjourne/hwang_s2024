@@ -48,7 +48,7 @@ except ImportError as e:
 has_compile = hasattr(torch, 'compile')
 
 
-logger = logging.getLogger('Allspiked-Attention')
+logger = logging.getLogger('Spiked-Attention')
 
 
 # The first arg parser parses out only the --config argument, this argument is used to
@@ -416,7 +416,7 @@ def validate(
                     f'Time: {batch_time_m.val:.3f} ({batch_time_m.avg:.3f})  '
                     f'Loss: {losses_m.val:>7.3f} ({losses_m.avg:>6.3f})  '
                     f'Acc@1: {top1_m.val:>7.3f} ({top1_m.avg:>7.3f})  '
-                    f'Acc@5: {top5_m.val:>7.3f} ({top5_m.avg:>7.3f})'
+                    f'Acc@5: {top5_m.val:>7.3f} ({top5_m.avg:>7.3f})  '
                 )
 
     if utils.is_primary(args):
@@ -469,7 +469,7 @@ def snn_validate(
         logger.info("Embed Spiking Neuron on each layer")
         logger.info(f"Base of SNN: {args.base}  ")
         logger.info(f"total timesteps of SNN: {args.timestep}  ")
-        logger.info("Validate Allspiked-Attention: Accuracy and Energy")
+        logger.info("Validate Spiked-Attention: Accuracy and Energy")
 
     model.eval()
 
@@ -539,7 +539,7 @@ def snn_validate(
                     f'{log_name}: [{batch_idx:>4d}/{last_idx}]  '
                     f'Time: {batch_time_m.val:.3f} ({batch_time_m.avg:.3f})  '
                     f'Acc@1: {top1_m.val:>7.3f} ({top1_m.avg:>7.3f})  '
-                    f'Acc@5: {top5_m.val:>7.3f} ({top5_m.avg:>7.3f})'
+                    f'Acc@5: {top5_m.val:>7.3f} ({top5_m.avg:>7.3f})  '
                     f"SynOP ANN Energy (mJ): ({flops *0.9 / 1e9 :>7.3f})  "
                     f"Total ANN Energy (mJ): ({energy / 1e9 :>7.3f})  "
                 )
@@ -550,7 +550,7 @@ def snn_validate(
 
     if utils.is_primary(args):
 
-        log_name = 'Converted Allspiked-Attention performance' + log_suffix
+        log_name = 'Converted Spiked-Attention performance' + log_suffix
         if args.distributed:
             energy = model.module.flops_snn(input_count_meter.avg)
             flops = model.module.flops_snn2(input_count_meter.avg)
@@ -565,7 +565,7 @@ def snn_validate(
                     f'{log_name}: [{batch_idx:>4d}/{last_idx}]  '
                     f'Time: {batch_time_m.val:.3f} ({batch_time_m.avg:.3f})  '
                     f'Acc@1: {top1_m.val:>7.3f} ({top1_m.avg:>7.3f})  '
-                    f'Acc@5: {top5_m.val:>7.3f} ({top5_m.avg:>7.3f})'
+                    f'Acc@5: {top5_m.val:>7.3f} ({top5_m.avg:>7.3f})  '
                     f"SynOP ANN Energy (mJ): ({flops *0.9 / 1e9 :>7.3f})  "
                     f"Total ANN Energy (mJ): ({energy / 1e9 :>7.3f})  "
         )

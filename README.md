@@ -1,6 +1,6 @@
-# Allspiked-Attention: An End-to-End Spike-based Vision Transformer with a Winner-Oriented Spike Shift for Softmax Operation
+# Spiked-Attention: An End-to-End Spike-based Vision Transformer with a Winner-Oriented Spike Shift for Softmax Operation
 ## What is?
-This is simple test code for Allspiked-Attention which submit to Neurips 2024.
+This is simple test code for Spiked-Attention which submit to Neurips 2024.
 The code is designed by PyTorch Image Models(TIMM) and SpikingJelly framework.
 Beacuse of limitation of supplement and annonymity, one of pre-trained ANN(swin-tiny without ReLU) is uploaded on below google drive. 
 * new annonymous google account created for sharing (account name is Allspikeformer)
@@ -28,7 +28,7 @@ Hyper Parameter:
 
 For example, run
 ```
-torchrun --nproc_per_node 4 main_distributed.py /workspace/dataset/imagenet --model swin_tiny_patch4_window7_224 --batch-size 64 --resume model_best.pth.tar --base 1.16 --timestep 40
+torchrun --nproc_per_node 4 main_distributed.py /workspace/dataset/imagenet --model swin_tiny_patch4_window7_224 --batch-size 64 --resume model_best.pth.tar --base 1.15 --timestep 40
 ```
 
 

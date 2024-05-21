@@ -282,7 +282,7 @@ class ScaledNeuron_onespike_time_bipolar(nn.Module):
                     self.md_shape[1] = self.md_shape[1]//batch_size
                 x = x.view(self.md_shape)
 
-            x = x/self.scale  # / (2**24)
+            x = x/self.scale  
             if self.initialize == False:
                 self.stdp_scale = 1
                 self.spike_counts = 0
