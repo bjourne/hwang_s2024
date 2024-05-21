@@ -23,7 +23,7 @@ In result, you can see result (accuracy/energy) as "output.log"
 
 Hyper Parameter:
 1. Number of Timestep (-t)   (Default: 40)
-2. Base B (1,2] *if B=2, it is binary coding (Default: 1.16)
+2. Base B (1,2] *if B=2, it is binary coding (Default: 1.15)
 
 
 For example, run

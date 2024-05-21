@@ -94,8 +94,6 @@ class PatchEmbed(nn.Module):
 
 
 def SpikeSim_Energy(flop, time_steps, ratio,potential_ratio,weight_num):
-    # ratio =1
-
     N_rd = flop
     N_neuron = flop/weight_num
     E_ad = 0.9 ##0.03
@@ -113,7 +111,6 @@ def SpikeSim_Energy(flop, time_steps, ratio,potential_ratio,weight_num):
     return E_snn
 
 def ANN_Energy(flop, weight_num,sparsity):
-    # sparsity =1
     N_rd = flop
     N_neuron = flop/weight_num
     E_ad = 0.9 ##0.03
@@ -220,25 +217,21 @@ class batch_PatchEmbed(nn.Module):
 
         x= self.patch_embed_if(x)
 
-        # x = self.norm(x)
         return x
     def flops(self):
         flops=0
-        # Ho, Wo = self.patches_resolution
         flops = self.num_patches * self.embed_dim * self.in_chans * (self.patch_size[0] * self.patch_size[1])
         if self.norm is not None:
             flops += self.num_patches * self.embed_dim
         return flops
     def flops_snn(self, input_ratio):
         flops=0
-        # Ho, Wo = self.patches_resolution
         flops += SpikeSim_Energy(self.num_patches * self.embed_dim * self.in_chans * (self.patch_size[0] * self.patch_size[1]),self.timestep, input_ratio, self.patch_embed_if.mem_count_meter.avg,self.num_patches * self.embed_dim  )
 
         return flops,self.patch_embed_if.spike_count_meter.avg
 
     def flops_ANN(self,input_ratio):
         flops=0
-        # Ho, Wo = self.patches_resolution
         flops += ANN_Energy(self.num_patches * self.embed_dim * self.in_chans * (self.patch_size[0] * self.patch_size[1]),self.num_patches * self.embed_dim,input_ratio  )
 
         return flops,self.patch_embed_if.spike_count_meter.avg
@@ -246,7 +239,6 @@ class batch_PatchEmbed(nn.Module):
 
     def flops_snn2(self,input_ratio):
         flops=0
-        # Ho, Wo = self.patches_resolution
         flops = self.num_patches * self.embed_dim * self.in_chans * (self.patch_size[0] * self.patch_size[1])*input_ratio
 
         return flops,self.patch_embed_if.spike_count_meter.avg

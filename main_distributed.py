@@ -540,8 +540,8 @@ def snn_validate(
                     f'Time: {batch_time_m.val:.3f} ({batch_time_m.avg:.3f})  '
                     f'Acc@1: {top1_m.val:>7.3f} ({top1_m.avg:>7.3f})  '
                     f'Acc@5: {top5_m.val:>7.3f} ({top5_m.avg:>7.3f})'
-                    f"SynOP ANN Energy (mJ): {flops *0.9 / 1e9 :>7.3f}  "
-                    f"Total ANN Energy (mJ): {energy / 1e9 :>7.3f}  "
+                    f"SynOP ANN Energy (mJ): ({flops *0.9 / 1e9 :>7.3f})  "
+                    f"Total ANN Energy (mJ): ({energy / 1e9 :>7.3f})  "
                 )
 
             if (top1_m.avg < 10):
@@ -566,8 +566,8 @@ def snn_validate(
                     f'Time: {batch_time_m.val:.3f} ({batch_time_m.avg:.3f})  '
                     f'Acc@1: {top1_m.val:>7.3f} ({top1_m.avg:>7.3f})  '
                     f'Acc@5: {top5_m.val:>7.3f} ({top5_m.avg:>7.3f})'
-                    f"SynOP ANN Energy (mJ): {flops *0.9 / 1e9 :>7.3f}  "
-                    f"Total ANN Energy (mJ): {energy / 1e9 :>7.3f}  "
+                    f"SynOP ANN Energy (mJ): ({flops *0.9 / 1e9 :>7.3f})  "
+                    f"Total ANN Energy (mJ): ({energy / 1e9 :>7.3f})  "
         )
 
         return metrics

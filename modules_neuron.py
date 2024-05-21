@@ -215,8 +215,9 @@ class ScaledNeuron_onespike_time_relu(nn.Module):
         self.neuron.v = 0.0
         self.x_sign = None
         self.stdp_scale = 1
-        self.spike_count_meter.update(self.spike_counts)
-        self.mem_count_meter.update(self.mem_counts)
+        if(self.initialize):
+            self.spike_count_meter.update(self.spike_counts)
+            self.mem_count_meter.update(self.mem_counts)
         self.spike_counts = 0
         self.mem_counts=0
         self.spike_counts = 0
@@ -362,8 +363,9 @@ class ScaledNeuron_onespike_time_bipolar(nn.Module):
         self.neuron.v = 0.0
         self.x_sign = None
         self.stdp_scale = 1
-        self.spike_count_meter.update(self.spike_counts)
-        self.mem_count_meter.update(self.mem_counts)
+        if(self.initialize):
+            self.spike_count_meter.update(self.spike_counts)
+            self.mem_count_meter.update(self.mem_counts)
         self.spike_counts = 0
         self.mem_counts = 0
         self.initialize = False
@@ -478,8 +480,9 @@ class WTA_layer_Neuron(nn.Module):
         self.block_input = 0
         self.neuron.reset()
         self.accum_neuron.reset()
-        self.spike_count_meter.update(self.spike_counts)
-        self.mem_count_meter.update(self.mem_counts)
+        if(self.initialize):
+            self.spike_count_meter.update(self.spike_counts)
+            self.mem_count_meter.update(self.mem_counts)
         self.spike_counts = 0
         self.mem_counts=0
         self.neuron.v_threshold = self.reset_threshold
