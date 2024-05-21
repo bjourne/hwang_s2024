@@ -13,6 +13,13 @@ In this code, you need to download pre-trained model on google drive.
 First, the code will run ANN(swin_tiny_patch4_window7_224) for scaling threshold(or weight normalization) and searching base.
 Then, pre-trained parameter will converted to SNN.(main_distributed.py)
 
+## Requirements
+To install requirements:
+
+```setup
+pip install -r requirements.txt
+```
+
 
 # How to RUN
 Run
