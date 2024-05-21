@@ -3,7 +3,7 @@
 This is simple test code for Spiked-Attention which submit to Neurips 2024.
 The code is designed by PyTorch Image Models(TIMM) and SpikingJelly framework.
 Beacuse of limitation of supplement and annonymity, one of pre-trained ANN(swin-tiny without ReLU) is uploaded on below google drive. 
-* new annonymous google account created for sharing (account name is Allspikeformer)
+* new annonymous google account created for sharing 
 
 link for pretrained ANN: https://drive.google.com/file/d/1SsV4KjJdISWiII378TgArzgT0ZQ-KixF/view?pli=1
 
