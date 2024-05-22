@@ -1,7 +1,7 @@
 from torch import nn
 import torch.nn.functional as F
 import torch
-from spikingjelly.activation_based import neuron
+from spikingjelly.activation_based import neuron_bert
 from timm.utils import AverageMeter
 
 
