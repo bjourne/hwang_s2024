@@ -50,8 +50,8 @@ has_compile = hasattr(torch, 'compile')
 
 logger = logging.getLogger('Spiked-Attention')
 
-file_handler = logging.FileHandler('Swin-SpikedAttention.log')
-logger.addHandler(file_handler)
+# file_handler = logging.FileHandler('Swin-SpikedAttention.log')
+# logger.addHandler(file_handler)
 
 # The first arg parser parses out only the --config argument, this argument is used to
 # load a yaml file containing key-values that override the defaults for the main parser below

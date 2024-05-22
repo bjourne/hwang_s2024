@@ -1,0 +1,158 @@
+Test in distributed mode with multiple processes, 1 device per process.Process 0, total 2, device cuda:0.
+Test in distributed mode with multiple processes, 1 device per process.Process 1, total 2, device cuda:1.
+Model swin_tiny_patch4_window7_224 created, param count:28323682
+AMP not enabled. Training in float32.
+Using native Torch DistributedDataParallel.
+#1: Run pre-trained Model(ANN) 
+ANN: [   0/390]  Time: 0.971 (0.971)  Loss:   0.436 ( 0.436)  Acc@1:  92.969 ( 92.969)  Acc@5:  99.219 ( 99.219)  
+ANN: [  50/390]  Time: 0.256 (0.274)  Loss:   0.366 ( 0.689)  Acc@1:  95.312 ( 85.922)  Acc@5: 100.000 ( 97.258)  
+ANN: [ 100/390]  Time: 0.236 (0.262)  Loss:   0.628 ( 0.723)  Acc@1:  89.062 ( 85.172)  Acc@5:  96.875 ( 97.177)  
+ANN: [ 150/390]  Time: 0.237 (0.267)  Loss:   0.779 ( 0.726)  Acc@1:  78.125 ( 85.068)  Acc@5:  97.656 ( 97.304)  
+ANN: [ 200/390]  Time: 0.236 (0.263)  Loss:   0.719 ( 0.809)  Acc@1:  87.500 ( 83.096)  Acc@5:  96.094 ( 96.350)  
+ANN: [ 250/390]  Time: 0.232 (0.262)  Loss:   0.566 ( 0.850)  Acc@1:  92.969 ( 82.078)  Acc@5:  98.438 ( 95.898)  
+ANN: [ 300/390]  Time: 0.283 (0.262)  Loss:   0.802 ( 0.883)  Acc@1:  84.375 ( 81.346)  Acc@5:  96.875 ( 95.582)  
+ANN: [ 350/390]  Time: 0.242 (0.260)  Loss:   0.815 ( 0.910)  Acc@1:  82.031 ( 80.787)  Acc@5:  96.094 ( 95.330)  
+ANN: [ 390/390]  Time: 0.093 (0.259)  Loss:   1.591 ( 0.912)  Acc@1:  53.750 ( 80.646)  Acc@5:  91.250 ( 95.344)  
+Pre-trained ANN Performance:  Acc@1:  80.646  Acc@5:  95.344  number of GFLOPs:   4.369  SynOP ANN Energy (mJ):  20.098  Total ANN Energy (mJ):  45.339  
+Embed Spiking Neuron on each layer
+Base of SNN: 1.15  
+total timesteps of SNN: 40  
+Validate Spiked-Attention: Accuracy and Energy
+SNN: [   0/390]  Time: 15.972 (15.972)  Acc@1:  91.406 ( 91.406)  Acc@5:  97.656 ( 97.656)  SynOP ANN Energy (mJ): (  2.976)  Total ANN Energy (mJ): ( 26.362)  
+SNN: [  50/390]  Time: 14.548 (14.514)  Acc@1:  96.094 ( 85.447)  Acc@5:  98.438 ( 97.059)  SynOP ANN Energy (mJ): (  2.978)  Total ANN Energy (mJ): ( 26.368)  
+SNN: [ 100/390]  Time: 14.556 (14.502)  Acc@1:  88.281 ( 84.623)  Acc@5:  96.875 ( 97.014)  SynOP ANN Energy (mJ): (  2.979)  Total ANN Energy (mJ): ( 26.384)  
+SNN: [ 150/390]  Time: 14.487 (14.496)  Acc@1:  78.906 ( 84.499)  Acc@5:  96.875 ( 97.144)  SynOP ANN Energy (mJ): (  2.980)  Total ANN Energy (mJ): ( 26.385)  
+SNN: [ 200/390]  Time: 14.472 (14.495)  Acc@1:  86.719 ( 82.556)  Acc@5:  96.094 ( 96.152)  SynOP ANN Energy (mJ): (  2.980)  Total ANN Energy (mJ): ( 26.385)  
+SNN: [ 250/390]  Time: 14.481 (14.493)  Acc@1:  92.188 ( 81.468)  Acc@5:  97.656 ( 95.674)  SynOP ANN Energy (mJ): (  2.980)  Total ANN Energy (mJ): ( 26.385)  
+SNN: [ 300/390]  Time: 14.483 (14.493)  Acc@1:  85.938 ( 80.669)  Acc@5:  95.312 ( 95.289)  SynOP ANN Energy (mJ): (  2.980)  Total ANN Energy (mJ): ( 26.385)  
+SNN: [ 350/390]  Time: 14.483 (14.493)  Acc@1:  79.688 ( 79.972)  Acc@5:  96.094 ( 94.996)  SynOP ANN Energy (mJ): (  2.980)  Total ANN Energy (mJ): ( 26.384)  
+SNN: [ 390/390]  Time: 10.187 (14.481)  Acc@1:  48.750 ( 79.842)  Acc@5:  90.000 ( 95.050)  SynOP ANN Energy (mJ): (  2.980)  Total ANN Energy (mJ): ( 26.383)  
+Converted Spiked-Attention performance: [ 390/390]  Time: 10.187 (14.481)  Acc@1:  48.750 ( 79.842)  Acc@5:  90.000 ( 95.050)  SynOP ANN Energy (mJ): (  2.980)  Total ANN Energy (mJ): ( 26.383)  
+Test in distributed mode with multiple processes, 1 device per process.Process 0, total 2, device cuda:0.
+Test in distributed mode with multiple processes, 1 device per process.Process 1, total 2, device cuda:1.
+Model swin_tiny_patch4_window7_224 created, param count:28323682
+AMP not enabled. Training in float32.
+Using native Torch DistributedDataParallel.
+#1: Run pre-trained Model(ANN) 
+ANN: [   0/390]  Time: 0.966 (0.966)  Loss:   0.436 ( 0.436)  Acc@1:  92.969 ( 92.969)  Acc@5:  99.219 ( 99.219)  
+ANN: [  50/390]  Time: 0.251 (0.273)  Loss:   0.366 ( 0.689)  Acc@1:  95.312 ( 85.922)  Acc@5: 100.000 ( 97.258)  
+ANN: [ 100/390]  Time: 0.242 (0.261)  Loss:   0.628 ( 0.723)  Acc@1:  89.062 ( 85.172)  Acc@5:  96.875 ( 97.177)  
+ANN: [ 150/390]  Time: 0.240 (0.267)  Loss:   0.779 ( 0.726)  Acc@1:  78.125 ( 85.068)  Acc@5:  97.656 ( 97.304)  
+ANN: [ 200/390]  Time: 0.230 (0.264)  Loss:   0.719 ( 0.809)  Acc@1:  87.500 ( 83.096)  Acc@5:  96.094 ( 96.350)  
+ANN: [ 250/390]  Time: 0.244 (0.263)  Loss:   0.566 ( 0.850)  Acc@1:  92.969 ( 82.078)  Acc@5:  98.438 ( 95.898)  
+ANN: [ 300/390]  Time: 0.292 (0.262)  Loss:   0.802 ( 0.883)  Acc@1:  84.375 ( 81.346)  Acc@5:  96.875 ( 95.582)  
+ANN: [ 350/390]  Time: 0.249 (0.260)  Loss:   0.815 ( 0.910)  Acc@1:  82.031 ( 80.787)  Acc@5:  96.094 ( 95.330)  
+ANN: [ 390/390]  Time: 0.094 (0.260)  Loss:   1.591 ( 0.912)  Acc@1:  53.750 ( 80.646)  Acc@5:  91.250 ( 95.344)  
+Pre-trained ANN Performance:  Acc@1:  80.646  Acc@5:  95.344  number of GFLOPs:   4.369  SynOP ANN Energy (mJ):  20.098  Total ANN Energy (mJ):  45.339  
+Embed Spiking Neuron on each layer
+Base of SNN: 1.15  
+total timesteps of SNN: 40  
+Validate Spiked-Attention: Accuracy and Energy
+SNN: [   0/390]  Time: 15.937 (15.937)  Acc@1:  91.406 ( 91.406)  Acc@5:  97.656 ( 97.656)  SynOP ANN Energy (mJ): (  2.976)  Total ANN Energy (mJ): ( 26.362)  
+Test in distributed mode with multiple processes, 1 device per process.Process 0, total 2, device cuda:0.
+Test in distributed mode with multiple processes, 1 device per process.Process 1, total 2, device cuda:1.
+Model swin_tiny_patch4_window7_224 created, param count:28323682
+AMP not enabled. Training in float32.
+Using native Torch DistributedDataParallel.
+#1: Run pre-trained Model(ANN) 
+ANN: [   0/390]  Time: 0.965 (0.965)  Loss:   0.436 ( 0.436)  Acc@1:  92.969 ( 92.969)  Acc@5:  99.219 ( 99.219)  
+ANN: [  50/390]  Time: 0.251 (0.274)  Loss:   0.366 ( 0.689)  Acc@1:  95.312 ( 85.922)  Acc@5: 100.000 ( 97.258)  
+ANN: [ 100/390]  Time: 0.243 (0.262)  Loss:   0.628 ( 0.723)  Acc@1:  89.062 ( 85.172)  Acc@5:  96.875 ( 97.177)  
+ANN: [ 150/390]  Time: 0.253 (0.269)  Loss:   0.779 ( 0.726)  Acc@1:  78.125 ( 85.068)  Acc@5:  97.656 ( 97.304)  
+ANN: [ 200/390]  Time: 0.234 (0.266)  Loss:   0.719 ( 0.809)  Acc@1:  87.500 ( 83.096)  Acc@5:  96.094 ( 96.350)  
+ANN: [ 250/390]  Time: 0.243 (0.265)  Loss:   0.566 ( 0.850)  Acc@1:  92.969 ( 82.078)  Acc@5:  98.438 ( 95.898)  
+ANN: [ 300/390]  Time: 0.302 (0.265)  Loss:   0.802 ( 0.883)  Acc@1:  84.375 ( 81.346)  Acc@5:  96.875 ( 95.582)  
+ANN: [ 350/390]  Time: 0.255 (0.264)  Loss:   0.815 ( 0.910)  Acc@1:  82.031 ( 80.787)  Acc@5:  96.094 ( 95.330)  
+ANN: [ 390/390]  Time: 0.094 (0.263)  Loss:   1.591 ( 0.912)  Acc@1:  53.750 ( 80.646)  Acc@5:  91.250 ( 95.344)  
+Pre-trained ANN Performance:  Acc@1:  80.646  Acc@5:  95.344  number of GFLOPs:   4.369  SynOP ANN Energy (mJ):  20.098  Total ANN Energy (mJ):  45.339  
+Embed Spiking Neuron on each layer
+Base of SNN: 1.15  
+total timesteps of SNN: 40  
+Validate Spiked-Attention: Accuracy and Energy
+SNN: [   0/390]  Time: 16.011 (16.011)  Acc@1:  91.406 ( 91.406)  Acc@5:  97.656 ( 97.656)  SynOP ANN Energy (mJ): (  2.976)  Total ANN Energy (mJ): ( 26.362)  
+Test in distributed mode with multiple processes, 1 device per process.Process 1, total 2, device cuda:1.
+Test in distributed mode with multiple processes, 1 device per process.Process 0, total 2, device cuda:0.
+Model swin_tiny_patch4_window7_224 created, param count:28323682
+AMP not enabled. Training in float32.
+Using native Torch DistributedDataParallel.
+#1: Run pre-trained Model(ANN) 
+ANN: [   0/390]  Time: 0.976 (0.976)  Loss:   6.905 ( 6.905)  Acc@1:   0.000 (  0.000)  Acc@5:   0.000 (  0.000)  
+ANN: [  50/390]  Time: 0.263 (0.278)  Loss:   6.831 ( 6.907)  Acc@1:   0.000 (  0.092)  Acc@5:   1.562 (  0.797)  
+ANN: [ 100/390]  Time: 0.242 (0.265)  Loss:   6.878 ( 6.913)  Acc@1:   0.000 (  0.147)  Acc@5:   0.000 (  0.541)  
+ANN: [ 150/390]  Time: 0.242 (0.270)  Loss:   6.864 ( 6.910)  Acc@1:   0.000 (  0.191)  Acc@5:   0.000 (  0.709)  
+ANN: [ 200/390]  Time: 0.233 (0.266)  Loss:   6.952 ( 6.909)  Acc@1:   0.000 (  0.171)  Acc@5:   0.000 (  0.669)  
+ANN: [ 250/390]  Time: 0.239 (0.265)  Loss:   6.894 ( 6.909)  Acc@1:   0.000 (  0.174)  Acc@5:   0.000 (  0.735)  
+ANN: [ 300/390]  Time: 0.288 (0.264)  Loss:   6.927 ( 6.910)  Acc@1:   0.000 (  0.153)  Acc@5:   0.000 (  0.654)  
+ANN: [ 350/390]  Time: 0.242 (0.262)  Loss:   6.864 ( 6.910)  Acc@1:   0.000 (  0.147)  Acc@5:   0.000 (  0.623)  
+Test in distributed mode with multiple processes, 1 device per process.Process 0, total 2, device cuda:0.
+Test in distributed mode with multiple processes, 1 device per process.Process 1, total 2, device cuda:1.
+Model swin_tiny_patch4_window7_224 created, param count:28323682
+AMP not enabled. Training in float32.
+Using native Torch DistributedDataParallel.
+#1: Run pre-trained Model(ANN) 
+ANN: [   0/390]  Time: 0.989 (0.989)  Loss:   6.905 ( 6.905)  Acc@1:   0.000 (  0.000)  Acc@5:   0.000 (  0.000)  
+ANN: [  50/390]  Time: 0.256 (0.276)  Loss:   6.831 ( 6.907)  Acc@1:   0.000 (  0.092)  Acc@5:   1.562 (  0.797)  
+ANN: [ 100/390]  Time: 0.239 (0.263)  Loss:   6.878 ( 6.913)  Acc@1:   0.000 (  0.147)  Acc@5:   0.000 (  0.541)  
+ANN: [ 150/390]  Time: 0.242 (0.269)  Loss:   6.864 ( 6.910)  Acc@1:   0.000 (  0.191)  Acc@5:   0.000 (  0.709)  
+Test in distributed mode with multiple processes, 1 device per process.Process 0, total 2, device cuda:0.
+Test in distributed mode with multiple processes, 1 device per process.Process 1, total 2, device cuda:1.
+Model swin_tiny_patch4_window7_224 created, param count:28323682
+AMP not enabled. Training in float32.
+Using native Torch DistributedDataParallel.
+#1: Run pre-trained Model(ANN) 
+ANN: [   0/390]  Time: 0.976 (0.976)  Loss:   0.436 ( 0.436)  Acc@1:  92.969 ( 92.969)  Acc@5:  99.219 ( 99.219)  
+ANN: [  50/390]  Time: 0.255 (0.277)  Loss:   0.366 ( 0.689)  Acc@1:  95.312 ( 85.922)  Acc@5: 100.000 ( 97.258)  
+ANN: [ 100/390]  Time: 0.249 (0.265)  Loss:   0.628 ( 0.723)  Acc@1:  89.062 ( 85.172)  Acc@5:  96.875 ( 97.177)  
+ANN: [ 150/390]  Time: 0.241 (0.270)  Loss:   0.779 ( 0.726)  Acc@1:  78.125 ( 85.068)  Acc@5:  97.656 ( 97.304)  
+ANN: [ 200/390]  Time: 0.237 (0.267)  Loss:   0.719 ( 0.809)  Acc@1:  87.500 ( 83.096)  Acc@5:  96.094 ( 96.350)  
+ANN: [ 250/390]  Time: 0.240 (0.266)  Loss:   0.566 ( 0.850)  Acc@1:  92.969 ( 82.078)  Acc@5:  98.438 ( 95.898)  
+ANN: [ 300/390]  Time: 0.278 (0.264)  Loss:   0.802 ( 0.883)  Acc@1:  84.375 ( 81.346)  Acc@5:  96.875 ( 95.582)  
+ANN: [ 350/390]  Time: 0.241 (0.263)  Loss:   0.815 ( 0.910)  Acc@1:  82.031 ( 80.787)  Acc@5:  96.094 ( 95.330)  
+ANN: [ 390/390]  Time: 0.093 (0.262)  Loss:   1.591 ( 0.912)  Acc@1:  53.750 ( 80.646)  Acc@5:  91.250 ( 95.344)  
+Pre-trained ANN Performance:  Acc@1:  80.646  Acc@5:  95.344  number of GFLOPs:   4.369  SynOP ANN Energy (mJ):  20.098  Total ANN Energy (mJ):  45.339  
+Embed Spiking Neuron on each layer
+Base of SNN: 1.15  
+total timesteps of SNN: 40  
+Validate Spiked-Attention: Accuracy and Energy
+SNN: [   0/390]  Time: 15.972 (15.972)  Acc@1:  91.406 ( 91.406)  Acc@5:  97.656 ( 97.656)  SynOP ANN Energy (mJ): (  2.976)  Total ANN Energy (mJ): ( 26.362)  
+Test in distributed mode with multiple processes, 1 device per process.Process 0, total 2, device cuda:0.
+Test in distributed mode with multiple processes, 1 device per process.Process 1, total 2, device cuda:1.
+Model swin_tiny_patch4_window7_224 created, param count:28323682
+AMP not enabled. Training in float32.
+Using native Torch DistributedDataParallel.
+#1: Run pre-trained Model(ANN) 
+ANN: [   0/390]  Time: 1.009 (1.009)  Loss:   0.436 ( 0.436)  Acc@1:  92.969 ( 92.969)  Acc@5:  99.219 ( 99.219)  
+ANN: [  50/390]  Time: 0.256 (0.276)  Loss:   0.366 ( 0.689)  Acc@1:  95.312 ( 85.922)  Acc@5: 100.000 ( 97.258)  
+ANN: [ 100/390]  Time: 0.243 (0.265)  Loss:   0.628 ( 0.723)  Acc@1:  89.062 ( 85.172)  Acc@5:  96.875 ( 97.177)  
+ANN: [ 150/390]  Time: 0.243 (0.272)  Loss:   0.779 ( 0.726)  Acc@1:  78.125 ( 85.068)  Acc@5:  97.656 ( 97.304)  
+ANN: [ 200/390]  Time: 0.235 (0.268)  Loss:   0.719 ( 0.809)  Acc@1:  87.500 ( 83.096)  Acc@5:  96.094 ( 96.350)  
+ANN: [ 250/390]  Time: 0.242 (0.267)  Loss:   0.566 ( 0.850)  Acc@1:  92.969 ( 82.078)  Acc@5:  98.438 ( 95.898)  
+ANN: [ 300/390]  Time: 0.296 (0.266)  Loss:   0.802 ( 0.883)  Acc@1:  84.375 ( 81.346)  Acc@5:  96.875 ( 95.582)  
+ANN: [ 350/390]  Time: 0.245 (0.264)  Loss:   0.815 ( 0.910)  Acc@1:  82.031 ( 80.787)  Acc@5:  96.094 ( 95.330)  
+ANN: [ 390/390]  Time: 0.093 (0.263)  Loss:   1.591 ( 0.912)  Acc@1:  53.750 ( 80.646)  Acc@5:  91.250 ( 95.344)  
+Pre-trained ANN Performance:  Acc@1:  80.646  Acc@5:  95.344  number of GFLOPs:   4.369  SynOP ANN Energy (mJ):  20.098  Total ANN Energy (mJ):  45.339  
+Embed Spiking Neuron on each layer
+Base of SNN: 1.15  
+total timesteps of SNN: 40  
+Validate Spiked-Attention: Accuracy and Energy
+SNN: [   0/390]  Time: 15.943 (15.943)  Acc@1:  91.406 ( 91.406)  Acc@5:  97.656 ( 97.656)  SynOP ANN Energy (mJ): (  2.976)  Total ANN Energy (mJ): ( 26.362)  
+Test in distributed mode with multiple processes, 1 device per process.Process 0, total 2, device cuda:0.
+Test in distributed mode with multiple processes, 1 device per process.Process 1, total 2, device cuda:1.
+Model swin_tiny_patch4_window7_224 created, param count:28323682
+AMP not enabled. Training in float32.
+Using native Torch DistributedDataParallel.
+#1: Run pre-trained Model(ANN) 
+ANN: [   0/390]  Time: 1.009 (1.009)  Loss:   6.905 ( 6.905)  Acc@1:   0.000 (  0.000)  Acc@5:   0.000 (  0.000)  
+ANN: [  50/390]  Time: 0.256 (0.279)  Loss:   6.831 ( 6.907)  Acc@1:   0.000 (  0.092)  Acc@5:   1.562 (  0.797)  
+ANN: [ 100/390]  Time: 0.243 (0.266)  Loss:   6.878 ( 6.913)  Acc@1:   0.000 (  0.147)  Acc@5:   0.000 (  0.541)  
+ANN: [ 150/390]  Time: 0.243 (0.271)  Loss:   6.864 ( 6.910)  Acc@1:   0.000 (  0.191)  Acc@5:   0.000 (  0.709)  
+ANN: [ 200/390]  Time: 0.238 (0.267)  Loss:   6.952 ( 6.909)  Acc@1:   0.000 (  0.171)  Acc@5:   0.000 (  0.669)  
+ANN: [ 250/390]  Time: 0.240 (0.266)  Loss:   6.894 ( 6.909)  Acc@1:   0.000 (  0.174)  Acc@5:   0.000 (  0.735)  
+ANN: [ 300/390]  Time: 0.292 (0.265)  Loss:   6.927 ( 6.910)  Acc@1:   0.000 (  0.153)  Acc@5:   0.000 (  0.654)  
+ANN: [ 350/390]  Time: 0.248 (0.263)  Loss:   6.864 ( 6.910)  Acc@1:   0.000 (  0.147)  Acc@5:   0.000 (  0.623)  
+ANN: [ 390/390]  Time: 0.094 (0.262)  Loss:   6.899 ( 6.910)  Acc@1:   0.000 (  0.140)  Acc@5:   0.000 (  0.606)  
+Pre-trained ANN Performance:  Acc@1:   0.140  Acc@5:   0.606  number of GFLOPs:   4.431  SynOP ANN Energy (mJ):  20.382  Total ANN Energy (mJ):  45.426  
+Embed Spiking Neuron on each layer
+Base of SNN: 1.15  
+total timesteps of SNN: 40  
+Validate Spiked-Attention: Accuracy and Energy
