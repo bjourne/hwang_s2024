@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from modules_neuron_bert import StraightThrough, WTA_layer_Neuron, MCN,MCN_2,MCN_3, ScaledNeuron_onespike_time_bipolar, ScaledNeuron_onespike_time_relu
+from modules_neuron_bert import StraightThrough, WTA_layer_Neuron, ANN_neruon,SNN_Nonpipe, ScaledNeuron_onespike_time_bipolar, ScaledNeuron_onespike_time_relu
 
 
 def isActivation(name):
@@ -28,7 +28,7 @@ def replace_identity_by_module(model, i_layer, batch_size):
                 module, i_layer, batch_size)
 
         if ((module.__class__.__name__ == "Identity" or module.__class__.__name__ == "ReLU") and name != "downsample" and name != "drop_path1" and name != "drop_path2" and name != "flatten"):
-            model._modules[name] = MCN(batch_size=batch_size)
+            model._modules[name] = ANN_neruon(batch_size=batch_size)
             model._modules[name].i_layer = i_layer
             model._modules[name].name = name
             if (name != "q_if" and name != "k_if"):
@@ -38,20 +38,20 @@ def replace_identity_by_module(model, i_layer, batch_size):
                 model._modules[name].relu_bool = True
     return model, i_layer
 
-def replace_MCN_by_MCN2(model, timestep, n_layer, tau):
+def replace_ANN_by_SNN(model, timestep, n_layer, tau):
 
     for name, module in model._modules.items():
         if hasattr(module, "_modules"):
-            model._modules[name], n_layer = replace_MCN_by_MCN2(
+            model._modules[name], n_layer = replace_ANN_by_SNN(
                 module, timestep, n_layer, tau)
         if hasattr(module, "ann"):
             model._modules[name].ann = False
         if hasattr(module, "max_act"):
                 if(name!="final_if"):
                     if(name=="softmax_if"):
-                        model._modules[name] = MCN_3(max_scale=module.max_act, timestep=timestep, base=tau, relu_bool=module.relu_bool,softmax_bool=True,name=name,n_layer=model._modules[name].i_layer)
+                        model._modules[name] = SNN_Nonpipe(max_scale=module.max_act, timestep=timestep, base=tau, relu_bool=module.relu_bool,softmax_bool=True,name=name,n_layer=model._modules[name].i_layer)
                     else:
-                        model._modules[name] = MCN_3(max_scale=module.max_act, timestep=timestep, base=tau, relu_bool=module.relu_bool,name=name,n_layer=model._modules[name].i_layer)
+                        model._modules[name] = SNN_Nonpipe(max_scale=module.max_act, timestep=timestep, base=tau, relu_bool=module.relu_bool,name=name,n_layer=model._modules[name].i_layer)
                     model._modules[name].last_dim = module.last_dim
 
     

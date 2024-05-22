@@ -12,82 +12,7 @@ class StraightThrough(nn.Module):
     def forward(self, input):
         return input
 
-
-# class MCN(nn.Module):
-#     def __init__(self, up=2., t=32, batch_size=64):
-#         super().__init__()
-#         self.max_act = 0
-#         self.t = t
-#         self.batch_size = batch_size
-#         self.relu_bool = False
-#         self.i_layer = 0
-#         self.relu = nn.ReLU()
-#         self.name = None
-#         self.full_scale = False
-#         self.batch_fusion_bool = False
-
-#     def forward(self, x):
-
-#         if (self.relu_bool):
-#             x = self.relu(x)
-#         ######
-#         # Code for get distribution of Activation on Transformer
-#         ######
-
-#         # find the scale of each neuron on inference
-#         if (isinstance(self.max_act, int)):
-#             if (x.shape[0] != self.batch_size):
-#                 self.batch_fusion_bool = True
-#                 tp_x = x.clone()
-#                 tp_shape = list(x.size())
-#                 tp_shape[0] = int(tp_shape[0]/self.batch_size)
-
-#                 tp_shape = list([self.batch_size])+tp_shape
-#                 tp_x = tp_x.view(tp_shape)
-#                 if (len(tp_shape) < 5):
-#                     self.max_act = tp_x.abs().max(0).values
-#                     self.full_scale = True
-#                 else:
-#                     self.max_act = tp_x.abs().max(0).values.max(-1).values
-#             else:
-#                 if (len(x.shape) < 4):
-#                     self.max_act = x.abs().max(0).values
-#                     self.full_scale = True
-#                 else:
-#                     self.max_act = x.abs().max(0).values.max(-1).values
-#         else:
-#             if (self.batch_fusion_bool):
-#                 tp_x = x.clone()
-#                 tp_shape = list(x.shape)
-#                 batch_size_tp = x.shape[0]//self.max_act.shape[0]
-#                 tp_shape[0] = int(tp_shape[0]/batch_size_tp)
-#                 tp_shape = list([batch_size_tp])+tp_shape
-#                 tp_x = tp_x.view(tp_shape)
-#                 if (self.full_scale):
-#                     self.max_act = torch.maximum(
-#                         tp_x.abs().max(0).values, self.max_act)
-#                 else:
-#                     self.max_act = torch.maximum(tp_x.abs().max(
-#                         0).values.max(-1).values, self.max_act)
-
-#             else:
-
-#                 if (self.full_scale):
-#                     self.max_act = torch.maximum(
-#                         x.abs().max(0).values, self.max_act)
-
-#                 else:
-#                     self.max_act = torch.maximum(x.abs().max(
-#                         0).values.max(-1).values, self.max_act)
-
-#         return x
-
-
-
-
-
-
-class MCN(nn.Module):
+class ANN_neruon(nn.Module):
     def __init__(self, up=2., t=32, batch_size=64):
         super().__init__()
         self.max_act = 0
@@ -132,51 +57,6 @@ class MCN(nn.Module):
         return x
 
 
-class MCN_2(nn.Module):
-    def __init__(self, base=2., timestep=16, batch_size=64,max_scale= None,relu_bool=False, softmax_bool= False, name=None,n_layer=None):
-        super().__init__()
-        self.max_act = 0
-        self.batch_size = batch_size
-        self.relu_bool = relu_bool
-        self.i_layer = n_layer
-        self.relu = nn.ReLU()
-        self.name = name
-        self.full_scale = False
-        self.batch_fusion_bool = False
-        self.base = base
-        self.timestep = timestep
-        self.scale = max_scale
-        self.softmax_bool = softmax_bool
-
-    def forward(self, x):
-        assert x[0].shape==self.scale.shape,(x.shape,self.scale.shape )
-        if (self.relu_bool):
-            x = self.relu(x)
-
-
-
-        if(self.softmax_bool):
-            atten_scale = x.max(-1).values.unsqueeze(-1)
-            attn = x/atten_scale
-            tp_round = (-torch.round(( 1-attn)/(torch.log(torch.tensor(self.base))/atten_scale ))) #*(1/torch.log(torch.tensor(base)))
-            
-            attn = torch.where(tp_round>=-self.timestep,self.base**tp_round,0)
-            result_x = attn/attn.sum(-1).unsqueeze(-1)
-        else:
-            x_ab = x.abs()
-            x_sign = x.sign()
-            # scale_v =  v_ab.max(-1).values.unsqueeze(-1)
-            x_ab = x_ab/self.scale
-            tp_log_value = torch.log(x_ab)/torch.log(torch.tensor(self.base))
-
-            tp_round = torch.where(tp_log_value<=-1,torch.round(tp_log_value),-1)
-            result_x = torch.where(tp_round>=-self.timestep,self.base**tp_round,0)*x_sign*self.scale
-
-
-
-        return result_x
-
-
 class MCN_3(nn.Module):
     def __init__(self, base=2., timestep=16, batch_size=64,max_scale= None,relu_bool=False, softmax_bool= False, name=None,n_layer=None):
         super().__init__()
@@ -214,10 +94,6 @@ class MCN_3(nn.Module):
                                                         tau=base, convert=self.convert_bool, trace_bool=True, stdp_bool=False)   
             
     def forward(self, x):
-        # assert x[0].shape==self.scale.shape,(x.shape,self.scale.shape )
-        # if (self.relu_bool):
-        #     x = self.relu(x)
-
         
         if(self.softmax_bool):
             for t in range(self.timestep):
@@ -441,15 +317,6 @@ class ScaledNeuron_onespike_time_bipolar(nn.Module):
     def forward(self, x):
 
         if (x is not None):
-
-            # if (len(x.shape) != len(self.scale.shape)):
-            #     if self.initialize == False:
-            #         self.x_shape = x.size()
-            #         batch_size = self.x_shape[0]//self.scale.shape[1]
-            #         self.md_shape = [batch_size]+list(self.x_shape)
-            #         self.md_shape[1] = self.md_shape[1]//batch_size
-            #     x = x.view(self.md_shape)
-
             x = x/self.scale  # / (2**24)
             if self.initialize == False:
                 self.stdp_scale = 1
@@ -683,15 +550,13 @@ class LabelSmoothing(nn.Module):
 class ScaledNeuron_onespike_time_double(nn.Module):
     def __init__(self, scale=1., timestep = 24, wait =12,start_time=0 , i_layer=0, tau = 2.0,convert = False, modulename = None,trace_bool = False, stdp_bool = False,scale_full =False,final_bool =False):
         super(ScaledNeuron_onespike_time_double, self).__init__()
-        # print(modulename,start_time,i_layer)
         self.scale_full = scale_full
         if(self.scale_full):
             tp_scale = scale.unsqueeze(0)
         else:
             tp_scale = scale.unsqueeze(-1).unsqueeze(0)
         self.final_bool = final_bool
-        # self.block_zero = torch.ones_like(tp_scale)
-        # self.block_zero[tp_scale==0] = 0
+
         self.scale = tp_scale
         self.timestep = timestep
         self.wait = wait
@@ -756,9 +621,7 @@ class ScaledNeuron_onespike_time_double(nn.Module):
                     self.neuron.v -= tp_max.unsqueeze(-1)*self.block_input.unsqueeze(-1)*self.neuron.v_threshold
                     self.block_input = torch.where(tp_max>0.0,0,self.block_input)
                     x = None
-            # else:
-            #     if(x is not None):
-            #         print(x.sum())
+
         else:
             x = None
         if(not(x== None)):

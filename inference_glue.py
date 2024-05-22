@@ -208,7 +208,7 @@ if __name__ == "__main__":
     print(f"number of GFLOPs: {student_model.flops() / 1e9 :>7.3f}  ")
     print(f"Total ANN Energy (mJ): {student_model.flops_ANN().data / 1e9 :>7.3f}  ")
 
-    model_2, n_layer = replace_MCN_by_MCN2(student_model,n_layer=0,timestep=args.timestep,tau=args.base)
+    model_2, n_layer = replace_ANN_by_SNN(student_model,n_layer=0,timestep=args.timestep,tau=args.base)
 
     
 
