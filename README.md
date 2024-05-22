@@ -7,7 +7,9 @@ Beacuse of limitation of supplement and annonymity, one of pre-trained ANN(swin-
 
 link for pretrained Swin-Transformer: https://drive.google.com/file/d/1RJH_tdjKLoUHRg0G25ccr0hG8oEQ_lmz/view?usp=sharing
 
-link for pretrained Swin-Transformer: https://drive.google.com/file/d/1A8bdmnU77eh-mDd_Zb0-RryR0zxvBAKH/view 
+link for pretrained pre-trained MA-BERT for SST-2: https://drive.google.com/file/d/1A8bdmnU77eh-mDd_Zb0-RryR0zxvBAKH/view 
+** You should unzip the file 
+
 
 In the case paper is accepted, we will provide online resource.
 
@@ -58,12 +60,12 @@ In result, you can see result (accuracy/energy) as "MABERT-SpikedAttention.log"
 
 For example, run
 ```
-torchrun --nproc_per_node 1  inference_glue.py --task sst2 --pretrained_file ../sst2-392-sst2 --batch_size 16  --base 1.4 --timestep 16
+torchrun --nproc_per_node 1  inference_glue.py --task sst2 --pretrained_file sst2-392-sst2 --batch_size 16  --base 1.4 --timestep 16
 ```
 
 If you use RTX 4000 Series, you need to Run as
 ```
-NCCL_P2P_DISABLE="1" NCCL_IB_DISABLE="1" torchrun --nproc_per_node 1  inference_glue.py --pretrained_file ../sst2-392-sst2 --batch_size 16  --base 1.4 --timestep 16
+NCCL_P2P_DISABLE="1" NCCL_IB_DISABLE="1" torchrun --nproc_per_node 1  inference_glue.py --pretrained_file sst2-392-sst2 --batch_size 16  --base 1.4 --timestep 16
 ```
 
 Note Multi-GPU not supported on MABERT-to-SpikedAttention.
