@@ -32,7 +32,7 @@ from packaging import version
 from torch import nn
 from torch.nn import BCEWithLogitsLoss, CrossEntropyLoss, MSELoss
 
-from metrics import AverageMeter
+from metrics import MeanMetric
 
 
 from ....activations import ACT2FN
@@ -255,7 +255,7 @@ class MA_BertEmbeddings(nn.Module):
         self.neuron_1_if = nn.Identity()
         # self.neuron_2_if = nn.Identity()
         self.dropout = nn.Dropout(config.hidden_dropout_prob)
-        self.neuron_1_if_meter = AverageMeter()
+        self.neuron_1_if_meter = MeanMetric()
         # position_ids (1, len position emb) is contiguous in memory and exported when serialized
         self.position_embedding_type = getattr(config, "position_embedding_type", "absolute")
         self.register_buffer("position_ids", torch.arange(config.max_position_embeddings).expand((1, -1)))
@@ -364,8 +364,8 @@ class MA_BertSelfAttention(nn.Module):
         self.stdp_av = nn.Identity()
 
         self.ann = True
-        self.hidden_states_meter = AverageMeter()
-        self.softmax_meter = AverageMeter()
+        self.hidden_states_meter = MeanMetric()
+        self.softmax_meter = MeanMetric()
 
         ### Modified for MA-BERT (Start)
         if config.use_softmax_approx == True:
@@ -546,7 +546,7 @@ class MA_BertSelfOutput(nn.Module):
         self.neuron_1_if = nn.Identity()
         self.neuron_2_if = nn.Identity()
         self.hidden_size = config.hidden_size
-        self.hidden_states_meter = AverageMeter()
+        self.hidden_states_meter = MeanMetric()
         self.ann =True
     def forward(self, hidden_states: torch.Tensor, input_tensor: torch.Tensor) -> torch.Tensor:
         #if(self.ann):
@@ -676,7 +676,7 @@ class MA_BertIntermediate(nn.Module):
             self.intermediate_act_fn = config.ffn_hidden_act
         self.ReLU_neuron = nn.ReLU()
         self.hidden_size = config.hidden_size
-        self.hidden_states_meter = AverageMeter()
+        self.hidden_states_meter = MeanMetric()
         self.ann =True
 
     def forward(self, hidden_states: torch.Tensor) -> torch.Tensor:
@@ -712,7 +712,7 @@ class MA_BertOutput(nn.Module):
         self.neuron_1_if = nn.Identity()
         self.neuron_2_if = nn.Identity()
 
-        self.hidden_states_meter = AverageMeter()
+        self.hidden_states_meter = MeanMetric()
         self.ann =True
 
     def forward(self, hidden_states: torch.Tensor, input_tensor: torch.Tensor) -> torch.Tensor:
@@ -958,7 +958,7 @@ class BertPooler(nn.Module):
         self.activation = nn.ReLU()
         self.hidden_size = config.hidden_size
 
-        self.hidden_states_meter = AverageMeter()
+        self.hidden_states_meter = MeanMetric()
         self.ann =True
 
     def forward(self, hidden_states: torch.Tensor) -> torch.Tensor:
@@ -1868,7 +1868,7 @@ class MA_BertForSequenceClassification(MA_BertPreTrainedModel):
         super().__init__(config)
         self.num_labels = config.num_labels
         self.config = config
-        self.hidden_states_meter = AverageMeter()
+        self.hidden_states_meter = MeanMetric()
         self.ann =True
         self.bert = MA_BertModel(config)
         classifier_dropout = (
