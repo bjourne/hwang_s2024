@@ -1,7 +1,7 @@
-# Spiked-Attention: An End-to-End Spike-based Vision Transformer with a Winner-Oriented Spike Shift for Softmax Operation
+# SpikedAttention: Training-Free and Fully Spike-Driven Transformer-to-SNN Conversion with Winner-Oriented Spike Shift for Softmax Operation
 ## What is?
 This is simple test code for Spiked-Attention which submit to Neurips 2024.
-The code is designed by PyTorch Image Models(TIMM) and SpikingJelly framework.
+The code is designed by PyTorch Image Models(TIMM), Huggingface Hub and SpikingJelly framework.
 Beacuse of limitation of supplement and annonymity, one of pre-trained ANN(swin-tiny without ReLU) is uploaded on below google drive. 
 * new annonymous google account created for sharing 
 
@@ -15,7 +15,7 @@ In the case paper is accepted, we will provide online resource.
 
 In this code, you need to download pre-trained model on google drive.
 First, the code will run ANN(swin_tiny_patch4_window7_224 or ma-bert) for scaling threshold(or weight normalization) and searching base.
-Then, pre-trained parameter will converted to SNN.(inferece_##.py)
+Then, pre-trained parameter will converted to SNN and run it.(inferece_##.py)
 
 ## Environments
 To install Environments:
@@ -51,7 +51,8 @@ torchrun --nproc_per_node 4 inference_swin.py /workspace/dataset/imagenet --batc
 ```
 Note ImageNet data path and pre-trained model must be included.
 
-# How to RUN (MABERT-to-SpikedAttention) ** only pre-trained model (MA-BERT) for SST-2 provided
+# How to RUN (MABERT-to-SpikedAttention) 
+** only pre-trained model (MA-BERT) for SST-2 provided
 Run
 ```
 torchrun --nproc_per_node 1 inference_glue.py --task "selected task" --batch-size "batch_size" --pretrained_file "path of pre-trained ANN(file name)" --base "base B" --timestep "number of timestep"
