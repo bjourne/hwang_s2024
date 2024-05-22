@@ -19,6 +19,7 @@ from datasets import load_dataset, load_metric #Need to install using pip instal
 import datasets
 import random
 import argparse
+from timm import utils
 
 device = "cuda:0" if torch.cuda.is_available() else "cpu"
 GLUE_TASKS = ["cola", "mnli", "mnli-mm", "mrpc", "qnli", "qqp", "rte", "sst2", "stsb", "wnli"]
@@ -129,10 +130,10 @@ if __name__ == "__main__":
     args = parser.parse_args()
     print(args)
     seed = random.randint(0, 1000)
-    
-    print("----Conversion of MA-BERT to Spiked Attention ----")
-    print("Timestep:",args.timestep)
-    print("Base:",args.base)
+    if utils.is_primary(args):
+        print("----Conversion of MA-BERT to Spiked Attention ----")
+        print("Timestep:",args.timestep)
+        print("Base:",args.base)
 
     ### Define task to fine tune bert on and to evaluate
     task = args.task
@@ -203,10 +204,11 @@ if __name__ == "__main__":
     preprocess_logits_for_metrics = preprocess_logits_for_metrics
 
     )    
-    print("----Performance of Pre-trained MA-BERT----")
-    print(trainer.evaluate())
-    print(f"number of GFLOPs: {student_model.flops() / 1e9 :>7.3f}  ")
-    print(f"Total ANN Energy (mJ): {student_model.flops_ANN().data / 1e9 :>7.3f}  ")
+    if utils.is_primary(args):
+        print("----Performance of Pre-trained MA-BERT----")
+        print(trainer.evaluate())
+        print(f"number of GFLOPs: {student_model.flops() / 1e9 :>7.3f}  ")
+        print(f"Total ANN Energy (mJ): {student_model.flops_ANN().data / 1e9 :>7.3f}  ")
 
     model_2, n_layer = replace_ANN_by_SNN(student_model,n_layer=0,timestep=args.timestep,tau=args.base)
 
@@ -222,6 +224,7 @@ if __name__ == "__main__":
     preprocess_logits_for_metrics = preprocess_logits_for_metrics
 
     )
-    print("----Performance of SpikedAttention----")
-    print(SNN.evaluate())
-    print(f"Total SNN Energy (mJ): {student_model.flops_SNN().data / 1e9 :>7.3f}  ")
+    if utils.is_primary(args):
+        print("----Performance of SpikedAttention----")
+        print(SNN.evaluate())
+        print(f"Total SNN Energy (mJ): {student_model.flops_SNN().data / 1e9 :>7.3f}  ")
