@@ -344,7 +344,7 @@ class One_LIFNode_convert(BaseNode):
 
             self.v = self.one_spike_bool_decay(self.v,  self.tau)
 
-        if (time >= self.start_time and time < self.start_time + self.timestep):
+        if (time >= self.start_time and time < self.start_time + 1): ##change here 
             self.v = self.one_spike_bool_input(x, self.v)
 
         if (time >= self.wait+self.start_time and time < self.start_time+self.timestep+self.wait):
@@ -428,7 +428,7 @@ class One_LIFNode(BaseNode):
         if (time >= self.start_time and time < self.start_time+self.timestep+self.wait):
             self.v = self.one_spike_bool_decay(self.v,  self.tau)
 
-        if (time >= self.start_time and time < self.start_time + self.timestep):
+        if (time >= self.start_time and time < self.start_time + 1):
 
             self.v = self.one_spike_bool_input(x, self.v)
 

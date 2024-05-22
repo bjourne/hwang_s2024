@@ -1,7 +1,7 @@
 from torch import nn
 import torch.nn.functional as F
 import torch
-from spikingjelly.activation_based import neuron
+from spikingjelly.activation_based import neuron_bert
 from metrics import AverageMeter
 
 
@@ -278,17 +278,17 @@ class ScaledNeuron_onespike_time_relu(nn.Module):
         self.i_layer = i_layer
         self.stdp_bool = stdp_bool
         if (trace_bool):
-            self.trace = neuron.neuron_trace(
+            self.trace = neuron_bert.neuron_trace(
                 tau=tau, v_reset=None, timestep=timestep, wait=wait, start_time=self.starttime)
         else:
             self.trace = False
         self.trace_v = None
         if (self.convert):
-            self.neuron = neuron.One_LIFNode_convert(tau=tau, v_reset=None, v_threshold=(
+            self.neuron = neuron_bert.One_LIFNode_convert(tau=tau, v_reset=None, v_threshold=(
                 2**(wait)*(1-(1-1/tau)/2)), timestep=timestep, wait=wait, start_time=self.starttime, biopolar_bool=False)
 
         else:
-            self.neuron = neuron.One_LIFNode(tau=tau, v_reset=None, v_threshold=(
+            self.neuron = neuron_bert.One_LIFNode(tau=tau, v_reset=None, v_threshold=(
                 tau**(wait)*(1-(1-1/tau)/2)), timestep=timestep, wait=wait, start_time=self.starttime, biopolar_bool=False)
         self.reset_threshold = (2**(wait)*(1-(1-1/tau)/2))
 
@@ -413,17 +413,17 @@ class ScaledNeuron_onespike_time_bipolar(nn.Module):
         self.i_layer = i_layer
         self.stdp_bool = stdp_bool
         if (trace_bool):
-            self.trace = neuron.neuron_trace(
+            self.trace = neuron_bert.neuron_trace(
                 tau=tau, v_reset=None, timestep=timestep, wait=wait, start_time=self.starttime)
         else:
             self.trace = False
         self.trace_v = None
         if (self.convert):
-            self.neuron = neuron.One_LIFNode_convert(tau=tau, v_reset=None, v_threshold=(
+            self.neuron = neuron_bert.One_LIFNode_convert(tau=tau, v_reset=None, v_threshold=(
                 2**(wait)*(1-(1-1/tau)/2)), timestep=timestep, wait=wait, start_time=self.starttime, biopolar_bool=True)
 
         else:
-            self.neuron = neuron.One_LIFNode(tau=tau, v_reset=None, v_threshold=(
+            self.neuron = neuron_bert.One_LIFNode(tau=tau, v_reset=None, v_threshold=(
                 tau**(wait)*(1-(1-1/tau)/2)), timestep=timestep, wait=wait, start_time=self.starttime, biopolar_bool=True)
         self.reset_threshold = (2**(wait)*(1-(1-1/tau)/2))
 
@@ -552,7 +552,7 @@ class WTA_layer_Neuron(nn.Module):
         self.i_layer = i_layer
         self.log_base = 1.0/torch.log(torch.tensor(tau))
         if (trace_bool):
-            self.trace = neuron.neuron_trace(
+            self.trace = neuron_bert.neuron_trace(
                 tau=tau, v_reset=None, timestep=timestep, wait=wait, start_time=self.starttime)
         else:
             self.trace = False
@@ -563,10 +563,10 @@ class WTA_layer_Neuron(nn.Module):
         self.tau = tau
         self.wta_bool = True
         self.block_wta = 0
-        self.accum_neuron = neuron.One_LIFNode(tau=tau, v_reset=None, v_threshold=(self.tau**(self.timestep-1)*(
+        self.accum_neuron = neuron_bert.One_LIFNode(tau=tau, v_reset=None, v_threshold=(self.tau**(self.timestep-1)*(
             1-(1-1/tau)/2)), timestep=timestep, wait=0, start_time=self.starttime+wait, biopolar_bool=False)
 
-        self.neuron = neuron.WTA_neuron(tau=tau, v_reset=None, v_threshold=float((self.tau**(self.timestep-1))/self.log_base),
+        self.neuron = neuron_bert.WTA_neuron(tau=tau, v_reset=None, v_threshold=float((self.tau**(self.timestep-1))/self.log_base),
                                         timestep=timestep, wait=wait, start_time=self.starttime, threshold_mv=(self.tau**(self.timestep-1))/self.log_base)
         self.reset_threshold = (self.tau**(self.timestep-1))/self.log_base
 
@@ -705,11 +705,11 @@ class ScaledNeuron_onespike_time_double(nn.Module):
         self.tau = tau
         self.log_base = 1.0/torch.log(torch.tensor(tau))
         if(trace_bool):
-            self.trace = neuron.neuron_trace(tau=tau,v_reset=None,timestep = timestep,wait =wait, start_time= self.starttime)
+            self.trace = neuron_bert.neuron_trace(tau=tau,v_reset=None,timestep = timestep,wait =wait, start_time= self.starttime)
         else:
             self.trace = False
         self.trace_v = None
-        self.neuron = neuron.double_threshold_neuron(tau=tau,v_reset=None, v_threshold=(tau**(wait))*(1-(1-1/tau)/2),timestep = timestep,wait =wait, start_time= self.starttime,biopolar_bool = False,threshold_shift=float((self.tau**(self.timestep-1))/self.log_base/2),threshold_mv=((self.tau**(self.timestep-1))/self.log_base),scale=self.scale)
+        self.neuron = neuron_bert.double_threshold_neuron(tau=tau,v_reset=None, v_threshold=(tau**(wait))*(1-(1-1/tau)/2),timestep = timestep,wait =wait, start_time= self.starttime,biopolar_bool = False,threshold_shift=float((self.tau**(self.timestep-1))/self.log_base/2),threshold_mv=((self.tau**(self.timestep-1))/self.log_base),scale=self.scale)
         self.reset_threshold = (self.tau**(self.timestep-1))/self.log_base/2
         self.tp =0
         self.initialize = False
