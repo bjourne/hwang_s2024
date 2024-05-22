@@ -116,14 +116,14 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--task', type=str, required=True)
+    parser.add_argument('--task', type=str, required=False, default="sst2")
     parser.add_argument('--pretrained_file', type=str, required=True)
-    parser.add_argument('--save_dir', type=str, required=True)
-    parser.add_argument('--file_name', type=str, required=True)
-    parser.add_argument('--model', type=str, required=True)
-    parser.add_argument('--batch_size', type=int, required=True)
-    parser.add_argument('--timestep', type=int, required=True)
-    parser.add_argument('--base', type=float, required=True)
+    parser.add_argument('--save_dir', type=str, required=False, default="result")
+    parser.add_argument('--file_name', type=str, required=False, default="sst2")
+    parser.add_argument('--model', type=str, required=False, default="bert-base-uncased")
+    parser.add_argument('--batch_size', type=int, required=False, default=10)
+    parser.add_argument('--timestep', type=int, required=False, default=16)
+    parser.add_argument('--base', type=float, required=False, default=1.4)
 
     
     args = parser.parse_args()
