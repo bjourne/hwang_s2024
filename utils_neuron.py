@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from modules_neuron import StraightThrough, WTA_layer_Neuron, ANN_neruon, ScaledNeuron_onespike_time_bipolar, ScaledNeuron_onespike_time_relu
+from modules_neuron import StraightThrough, WTA_layer_Neuron, ANN_neruon, ScaledNeuron_onespike_time_bipolar, ScaledNeuron_onespike_time_relu,NoPIP_neuron
 
 
 def isActivation(name):
@@ -20,6 +20,24 @@ def issigmoid(name):
         return True
     return False
 
+def replace_by_NoPIP_neuron(model, timestep, n_layer, tau):
+
+    for name, module in model._modules.items():
+        if hasattr(module, "_modules"):
+            model._modules[name], n_layer = replace_by_NoPIP_neuron(
+                module, timestep, n_layer, tau)
+        if hasattr(module, "ann"):
+            model._modules[name].ann = False
+        if hasattr(module, "max_act"):
+                if(name!="final_if"):
+                    if(name=="softmax_if"):
+                        model._modules[name] = NoPIP_neuron(max_scale=module.max_act, timestep=timestep, base=tau, relu_bool=module.relu_bool,softmax_bool=True,name=name,n_layer=model._modules[name].i_layer)
+                    else:
+                        model._modules[name] = NoPIP_neuron(max_scale=module.max_act, timestep=timestep, base=tau, relu_bool=module.relu_bool,name=name,n_layer=model._modules[name].i_layer)
+                    model._modules[name].last_dim = module.last_dim
+
+    
+    return model, n_layer
 
 def replace_identity_by_module(model, i_layer, batch_size):
     for name, module in model._modules.items():

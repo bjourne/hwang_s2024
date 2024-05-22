@@ -490,6 +490,81 @@ class WTA_layer_Neuron(nn.Module):
         self.initialize = False
         self.wta_bool = True
 
+class NoPIP_neuron(nn.Module):
+    def __init__(self, base=2., timestep=16, batch_size=64,max_scale= None,relu_bool=False, softmax_bool= False, name=None,n_layer=None):
+        super().__init__()
+        self.max_act = max_scale
+        self.batch_size = batch_size
+        self.relu_bool = relu_bool
+        self.i_layer = n_layer
+        self.relu = nn.ReLU()
+        self.name = name
+        self.full_scale = False
+        self.batch_fusion_bool = False
+        self.base = base
+        self.timestep = timestep
+        self.scale = max_scale
+        self.softmax_bool = softmax_bool
+        self.last_dim =0
+        self.sparisty_meter = AverageMeter()
+        self.timstep_cycle =0
+        if(n_layer==0):
+            self.convert_bool = False 
+        else:
+            self.convert_bool = False
+        
+
+        if(softmax_bool):
+            self.neuron=WTA_layer_Neuron(scale=1.0, timestep=timestep, wait=timestep, start_time=0, i_layer=n_layer, tau=base, convert=False, modulename=name, trace_bool=True)
+                    
+        else:
+            if(self.relu_bool):
+                self.neuron = ScaledNeuron_onespike_time_relu(scale=self.scale, timestep=timestep, wait=1, start_time=0, i_layer=n_layer,
+                                                        tau=base, convert=self.convert_bool, trace_bool=True, stdp_bool=False)   
+            
+            else:
+                self.neuron = ScaledNeuron_onespike_time_bipolar(scale=self.scale, timestep=timestep, wait=1, start_time=0, i_layer=n_layer,
+                                                        tau=base, convert=self.convert_bool, trace_bool=True, stdp_bool=False)   
+            
+    def forward(self, x):
+        if(self.softmax_bool):
+            for t in range(self.timestep):
+                a= self.neuron(x[t])
+            for t in range(self.timestep):    
+                if(t==0):
+                        result_x =self.neuron(None)
+                        # assert False, (result_x,self.neuron.t)
+                else:
+                        result_x *=self.base
+                        result_x +=self.neuron(None)
+            result_x= result_x/(self.base**(self.timestep))/self.neuron.spike_sum.unsqueeze(-1)
+            self.neuron.reset()
+            
+        elif(self.name=="stdp_qk"):
+            a= self.neuron(x)
+            result_x = []
+            for t in range(self.timestep):    
+                result =self.neuron(None)   
+                result_x.append(result)
+            self.neuron.reset()
+        else:
+            a= self.neuron(x)
+            for t in range(self.timestep):    
+                if(t==0):
+                    result_x =self.neuron(None)
+                else:
+                    result_x *=self.base
+                    result_tp =self.neuron(None)
+                    result_x +=result_tp
+            result_x= result_x/(self.base**(self.timestep-1))
+            self.neuron.reset()
+
+        if(not self.name=="stdp_qk"):
+            self.sparisty_meter.update(torch.count_nonzero(result_x)/torch.numel(result_x))
+
+        self.timstep_cycle = self.neuron.mem_count_meter.avg
+        return result_x
+
 
 class LabelSmoothing(nn.Module):
     """
