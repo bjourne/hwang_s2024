@@ -22,7 +22,7 @@ def issigmoid(name):
 
 
 
-def replace_identity_by_module(model, i_layer, batch_size):
+def replace_identity_by_module_bert(model, i_layer, batch_size):
     for name, module in model._modules.items():
         if hasattr(module, "_modules"):
             model._modules[name], i_layer = replace_identity_by_module(
