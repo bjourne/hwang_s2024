@@ -662,3 +662,89 @@ class double_threshold_neuron(BaseNode):
             spike = None
 
         return spike
+
+class One_LIFNode_convert_bert(BaseNode):
+    def __init__(self, tau: float = 2., decay_input: bool = False, v_threshold: float = 1.,
+                 v_reset: float = 0., surrogate_function: Callable = surrogate.Sigmoid(),
+                 detach_reset: bool = False, step_mode='s', backend='torch', store_v_seq: bool = False, timestep: int = 16, wait: int = 4, start_time: int = 0, biopolar_bool: bool = False):
+
+        assert isinstance(tau, float)  # and tau > 1.
+
+        super().__init__(v_threshold, v_reset, surrogate_function,
+                         detach_reset, step_mode, backend, store_v_seq)
+        self.bioploar = biopolar_bool
+        self.tau = tau
+        self.decay_input = decay_input
+        self.wait = wait
+        self.timestep = timestep
+        self.start_time = start_time
+
+    @property
+    def supported_backends(self):
+        if self.step_mode == 's':
+            return ('torch', 'cupy')
+        elif self.step_mode == 'm':
+            return ('torch', 'cupy')
+        else:
+            raise ValueError(self.step_mode)
+
+    def extra_repr(self):
+        return super().extra_repr() + f', tau={self.tau}' + f', timestep={self.timestep}' + f', wait={self.wait},  starttime={self.start_time}'
+
+    @staticmethod
+    @torch.jit.script
+    def one_spike_bool_decay(v: torch.Tensor,  tau: float):
+        v = v * 2.0
+        return v
+
+    @staticmethod
+    @torch.jit.script
+    def one_spike_bool_input(x: torch.Tensor, v: torch.Tensor):
+
+        v += x
+
+        return v
+
+    @staticmethod
+    @torch.jit.script
+    def one_spike_bool_fire(v: torch.Tensor, v_threshold: float, tau: float):
+        v_threshold = v_threshold*2.0/tau
+        spike = (v >= v_threshold).to(v)
+
+        return spike, v, v_threshold
+
+    @staticmethod
+    @torch.jit.script
+    def one_spike_bool_fire_bipolar(v: torch.Tensor, v_threshold: float, tau: float):
+        v_threshold = v_threshold*2.0/tau
+        spike = (v >= v_threshold).to(v)
+        spike -= (v <= -v_threshold).to(v)
+
+        return spike, v, v_threshold
+
+    def single_step_forward(self, x: torch.Tensor,  time=0):
+
+        if (x is not None):
+            self.v_float_to_tensor(x)
+
+        if (time >= self.start_time and time < self.start_time+self.timestep+self.wait):
+
+            self.v = self.one_spike_bool_decay(self.v,  self.tau)
+
+        if (time >= self.start_time and time < self.start_time + 1): ##change here 
+            self.v = self.one_spike_bool_input(x, self.v)
+
+        if (time >= self.wait+self.start_time and time < self.start_time+self.timestep+self.wait):
+            if (self.bioploar):
+                spike, self.v, self.v_threshold = self.one_spike_bool_fire_bipolar(
+                    v=self.v,  v_threshold=self.v_threshold, tau=self.tau)
+            else:
+                spike, self.v, self.v_threshold = self.one_spike_bool_fire(
+                    v=self.v,  v_threshold=self.v_threshold, tau=self.tau)
+
+        else:
+            spike = None
+
+        return spike
+
+
