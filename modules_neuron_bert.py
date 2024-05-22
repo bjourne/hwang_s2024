@@ -57,7 +57,7 @@ class ANN_neruon(nn.Module):
         return x
 
 
-class MCN_3(nn.Module):
+class SNN_Nonpipe(nn.Module):
     def __init__(self, base=2., timestep=16, batch_size=64,max_scale= None,relu_bool=False, softmax_bool= False, name=None,n_layer=None):
         super().__init__()
         self.max_act = max_scale
