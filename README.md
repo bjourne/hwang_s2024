@@ -30,7 +30,7 @@ To install Environments:
 
 Run
 ```
-torchrun --nproc_per_node "num_of_gpu" main_distributed.py "data_path of ImageNet" --model swin_tiny_patch4_window7_224 --batch-size "batch_size" --resume "path of pre-trained ANN" --base "base B" --timestep "number of timestep"
+torchrun --nproc_per_node "num_of_gpu" inference_swin.py "data_path of ImageNet" --model swin_tiny_patch4_window7_224 --batch-size "batch_size" --resume "path of pre-trained ANN" --base "base B" --timestep "number of timestep"
 ```
 
 In result, you can see result (accuracy/energy) as "Swin-SpikedAttention.log"
@@ -42,12 +42,12 @@ Hyper Parameter:
 
 For example, run
 ```
-torchrun --nproc_per_node 4 main_distributed.py /workspace/dataset/imagenet --model swin_tiny_patch4_window7_224 --batch-size 64 --resume model_best.pth.tar --base 1.15 --timestep 40
+torchrun --nproc_per_node 4 inference_swin.py /workspace/dataset/imagenet --model swin_tiny_patch4_window7_224 --batch-size 64 --resume model_best.pth.tar --base 1.15 --timestep 40
 ```
 
 For using pre-fixed paramter, run (SIMPLE Version)
 ```
-torchrun --nproc_per_node 4 main_distributed.py /workspace/dataset/imagenet --batch-size 64 --resume model_best.pth.tar 
+torchrun --nproc_per_node 4 inference_swin.py /workspace/dataset/imagenet --batch-size 64 --resume model_best.pth.tar 
 ```
 Note ImageNet data path and pre-trained model must be included.
 
