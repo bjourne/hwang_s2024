@@ -1,7 +1,7 @@
 from torch import nn
 import torch.nn.functional as F
 import torch
-from spikingjelly.activation_based import neuron_bert
+from spikingjelly.activation_based import neuron
 from timm.utils import AverageMeter
 
 
@@ -34,7 +34,7 @@ class StraightThrough(nn.Module):
 #         # Code for get distribution of Activation on Transformer
 #         ######
 
-#         # find the scale of each neuron_bert on inference
+#         # find the scale of each neuron on inference
 #         if (isinstance(self.max_act, int)):
 #             if (x.shape[0] != self.batch_size):
 #                 self.batch_fusion_bool = True
@@ -112,7 +112,7 @@ class MCN(nn.Module):
         # Code for get distribution of Activation on Transformer
         ######
 
-        # find the scale of each neuron_bert on inference
+        # find the scale of each neuron on inference
         if (isinstance(self.max_act, int)):
                     if(self.name=="stdp_av" or self.name=="stdp_qk" or self.name=="k_if" or self.name=="q_if" or self.name=="v_if" ):
                         self.max_act = x.abs().max(0).values.max(-1).values.unsqueeze(-1)
@@ -202,15 +202,15 @@ class MCN_3(nn.Module):
         
 
         if(softmax_bool):
-            self.neuron_bert=WTA_layer_neuron_bert(scale=1.0, timestep=timestep, wait=timestep, start_time=0, i_layer=n_layer, tau=base, convert=False, modulename=name, trace_bool=True)
+            self.neuron=WTA_layer_Neuron(scale=1.0, timestep=timestep, wait=timestep, start_time=0, i_layer=n_layer, tau=base, convert=False, modulename=name, trace_bool=True)
                     
         else:
             if(self.relu_bool):
-                self.neuron_bert = Scaledneuron_bert_onespike_time_relu(scale=self.scale, timestep=timestep, wait=1, start_time=0, i_layer=n_layer,
+                self.neuron = ScaledNeuron_onespike_time_relu(scale=self.scale, timestep=timestep, wait=1, start_time=0, i_layer=n_layer,
                                                         tau=base, convert=self.convert_bool, trace_bool=True, stdp_bool=False)   
             
             else:
-                self.neuron_bert = Scaledneuron_bert_onespike_time_bipolar(scale=self.scale, timestep=timestep, wait=1, start_time=0, i_layer=n_layer,
+                self.neuron = ScaledNeuron_onespike_time_bipolar(scale=self.scale, timestep=timestep, wait=1, start_time=0, i_layer=n_layer,
                                                         tau=base, convert=self.convert_bool, trace_bool=True, stdp_bool=False)   
             
     def forward(self, x):
@@ -221,49 +221,49 @@ class MCN_3(nn.Module):
         
         if(self.softmax_bool):
             for t in range(self.timestep):
-                a= self.neuron_bert(x[t])
+                a= self.neuron(x[t])
             for t in range(self.timestep):    
                 if(t==0):
-                        result_x =self.neuron_bert(None)
-                        # assert False, (result_x,self.neuron_bert.t)
+                        result_x =self.neuron(None)
+                        # assert False, (result_x,self.neuron.t)
                 else:
                         result_x *=self.base
-                        result_x +=self.neuron_bert(None)
-            result_x= result_x/(self.base**(self.timestep))/self.neuron_bert.spike_sum.unsqueeze(-1)
-            self.neuron_bert.reset()
+                        result_x +=self.neuron(None)
+            result_x= result_x/(self.base**(self.timestep))/self.neuron.spike_sum.unsqueeze(-1)
+            self.neuron.reset()
             
         elif(self.name=="stdp_qk"):
-            a= self.neuron_bert(x)
+            a= self.neuron(x)
             result_x = []
             for t in range(self.timestep):    
-                result =self.neuron_bert(None)   
+                result =self.neuron(None)   
                 result_x.append(result)
-            self.neuron_bert.reset()
+            self.neuron.reset()
         else:
-            a= self.neuron_bert(x)
+            a= self.neuron(x)
             for t in range(self.timestep):    
                 if(t==0):
-                    result_x =self.neuron_bert(None)
-                    # assert False, (result_x,self.neuron_bert.t)
+                    result_x =self.neuron(None)
+                    # assert False, (result_x,self.neuron.t)
                 else:
                     result_x *=self.base
-                    result_tp =self.neuron_bert(None)
+                    result_tp =self.neuron(None)
                     result_x +=result_tp
             result_x= result_x/(self.base**(self.timestep-1))
-            self.neuron_bert.reset()
+            self.neuron.reset()
 
         if(not self.name=="stdp_qk"):
             self.sparisty_meter.update(torch.count_nonzero(result_x)/torch.numel(result_x))
 
-        self.timstep_cycle = self.neuron_bert.mem_count_meter.avg
+        self.timstep_cycle = self.neuron.mem_count_meter.avg
         return result_x
 
 
 
 
-class Scaledneuron_bert_onespike_time_relu(nn.Module):
+class ScaledNeuron_onespike_time_relu(nn.Module):
     def __init__(self, scale=1., timestep=24, wait=12, start_time=0, i_layer=0, tau=2.0, convert=False, modulename=None, trace_bool=False, stdp_bool=False, scale_full=False, final_bool=False):
-        super(Scaledneuron_bert_onespike_time_relu, self).__init__()
+        super(ScaledNeuron_onespike_time_relu, self).__init__()
         self.scale_full = scale_full
 
         self.final_bool = final_bool
@@ -278,17 +278,17 @@ class Scaledneuron_bert_onespike_time_relu(nn.Module):
         self.i_layer = i_layer
         self.stdp_bool = stdp_bool
         if (trace_bool):
-            self.trace = neuron_bert.neuron_bert_trace(
+            self.trace = neuron.neuron_trace(
                 tau=tau, v_reset=None, timestep=timestep, wait=wait, start_time=self.starttime)
         else:
             self.trace = False
         self.trace_v = None
         if (self.convert):
-            self.neuron_bert = neuron_bert.One_LIFNode_convert(tau=tau, v_reset=None, v_threshold=(
+            self.neuron = neuron.One_LIFNode_convert(tau=tau, v_reset=None, v_threshold=(
                 2**(wait)*(1-(1-1/tau)/2)), timestep=timestep, wait=wait, start_time=self.starttime, biopolar_bool=False)
 
         else:
-            self.neuron_bert = neuron_bert.One_LIFNode(tau=tau, v_reset=None, v_threshold=(
+            self.neuron = neuron.One_LIFNode(tau=tau, v_reset=None, v_threshold=(
                 tau**(wait)*(1-(1-1/tau)/2)), timestep=timestep, wait=wait, start_time=self.starttime, biopolar_bool=False)
         self.reset_threshold = (2**(wait)*(1-(1-1/tau)/2))
 
@@ -324,7 +324,7 @@ class Scaledneuron_bert_onespike_time_relu(nn.Module):
                 self.spike_counts = 0
                 self.mem_counts=0
 
-                self.neuron_bert(torch.zeros_like(x))
+                self.neuron(torch.zeros_like(x))
                 self.block = torch.zeros_like(x)
                 self.x_sign = torch.zeros_like(x)
                 self.trace_v = 0
@@ -336,10 +336,10 @@ class Scaledneuron_bert_onespike_time_relu(nn.Module):
                 if (self.x_shape is not None):
                     tp_md_shape = self.md_shape
                     tp_md_shape[-1] = 1
-                    self.neuron_bert.v /= self.stdp_scale.view(tp_md_shape)
+                    self.neuron.v /= self.stdp_scale.view(tp_md_shape)
                 else:
-                    self.neuron_bert.v /= self.stdp_scale
-            x = self.neuron_bert(x, time=self.t)
+                    self.neuron.v /= self.stdp_scale
+            x = self.neuron(x, time=self.t)
 
         else:
             x = None
@@ -362,7 +362,7 @@ class Scaledneuron_bert_onespike_time_relu(nn.Module):
             self.reset(t_reset_bool=False)
         self.t += 1
         if (self.final_bool and self.t == (self.starttime + self.timestep)):
-            return self.neuron_bert.v * self.scale
+            return self.neuron.v * self.scale
 
         if (x is not None):
             self.spike_counts += torch.count_nonzero(x)/(x.flatten()).size()[0]
@@ -377,14 +377,14 @@ class Scaledneuron_bert_onespike_time_relu(nn.Module):
             self.t = 0
         self.block = 0
         self.tp = 0
-        self.neuron_bert.reset()
+        self.neuron.reset()
         if (self.trace):
             self.trace.reset()
             self.trace_pure = 0
             self.trace_v = 0
         if (self.convert):
-            self.neuron_bert.v_threshold = self.reset_threshold
-        self.neuron_bert.v = 0.0
+            self.neuron.v_threshold = self.reset_threshold
+        self.neuron.v = 0.0
         self.x_sign = None
         self.stdp_scale = 1
         # if (self.spike_counts > 0):
@@ -395,9 +395,9 @@ class Scaledneuron_bert_onespike_time_relu(nn.Module):
         self.initialize = False
 
 
-class Scaledneuron_bert_onespike_time_bipolar(nn.Module):
+class ScaledNeuron_onespike_time_bipolar(nn.Module):
     def __init__(self, scale=1., timestep=24, wait=12, start_time=0, i_layer=0, tau=2.0, convert=False, modulename=None, trace_bool=False, stdp_bool=False, scale_full=False, final_bool=False):
-        super(Scaledneuron_bert_onespike_time_bipolar, self).__init__()
+        super(ScaledNeuron_onespike_time_bipolar, self).__init__()
         self.scale_full = scale_full
 
         self.final_bool = final_bool
@@ -413,17 +413,17 @@ class Scaledneuron_bert_onespike_time_bipolar(nn.Module):
         self.i_layer = i_layer
         self.stdp_bool = stdp_bool
         if (trace_bool):
-            self.trace = neuron_bert.neuron_bert_trace(
+            self.trace = neuron.neuron_trace(
                 tau=tau, v_reset=None, timestep=timestep, wait=wait, start_time=self.starttime)
         else:
             self.trace = False
         self.trace_v = None
         if (self.convert):
-            self.neuron_bert = neuron_bert.One_LIFNode_convert(tau=tau, v_reset=None, v_threshold=(
+            self.neuron = neuron.One_LIFNode_convert(tau=tau, v_reset=None, v_threshold=(
                 2**(wait)*(1-(1-1/tau)/2)), timestep=timestep, wait=wait, start_time=self.starttime, biopolar_bool=True)
 
         else:
-            self.neuron_bert = neuron_bert.One_LIFNode(tau=tau, v_reset=None, v_threshold=(
+            self.neuron = neuron.One_LIFNode(tau=tau, v_reset=None, v_threshold=(
                 tau**(wait)*(1-(1-1/tau)/2)), timestep=timestep, wait=wait, start_time=self.starttime, biopolar_bool=True)
         self.reset_threshold = (2**(wait)*(1-(1-1/tau)/2))
 
@@ -455,7 +455,7 @@ class Scaledneuron_bert_onespike_time_bipolar(nn.Module):
                 self.stdp_scale = 1
                 self.spike_counts = 0
 
-                self.neuron_bert(torch.zeros_like(x))
+                self.neuron(torch.zeros_like(x))
                 self.block = torch.zeros_like(x)
                 self.x_sign = torch.zeros_like(x)
                 self.trace_v = 0
@@ -468,10 +468,10 @@ class Scaledneuron_bert_onespike_time_bipolar(nn.Module):
                 if (self.x_shape is not None):
                     tp_md_shape = self.md_shape
                     tp_md_shape[-1] = 1
-                    self.neuron_bert.v /= self.stdp_scale.view(tp_md_shape)
+                    self.neuron.v /= self.stdp_scale.view(tp_md_shape)
                 else:
-                    self.neuron_bert.v /= self.stdp_scale
-            x = self.neuron_bert(x, time=self.t)
+                    self.neuron.v /= self.stdp_scale
+            x = self.neuron(x, time=self.t)
 
         else:
             x = None
@@ -501,7 +501,7 @@ class Scaledneuron_bert_onespike_time_bipolar(nn.Module):
             self.reset(t_reset_bool=False)
         self.t += 1
         if (self.final_bool and self.t == (self.starttime + self.timestep)):
-            return self.neuron_bert.v * self.scale
+            return self.neuron.v * self.scale
 
 
 
@@ -518,14 +518,14 @@ class Scaledneuron_bert_onespike_time_bipolar(nn.Module):
             self.t = 0
         self.block = 0
         self.tp = 0
-        self.neuron_bert.reset()
+        self.neuron.reset()
         if (self.trace):
             self.trace.reset()
             self.trace_pure = 0
             self.trace_v = 0
         if (self.convert):
-            self.neuron_bert.v_threshold = self.reset_threshold
-        self.neuron_bert.v = 0.0
+            self.neuron.v_threshold = self.reset_threshold
+        self.neuron.v = 0.0
         self.x_sign = None
         self.stdp_scale = 1
         # if (self.spike_counts > 0):
@@ -536,9 +536,9 @@ class Scaledneuron_bert_onespike_time_bipolar(nn.Module):
         self.initialize = False
 
 
-class WTA_layer_neuron_bert(nn.Module):
+class WTA_layer_Neuron(nn.Module):
     def __init__(self, scale=1., timestep=24, wait=12, start_time=0, i_layer=0, tau=2.0, convert=False, modulename=None, trace_bool=False):
-        super(WTA_layer_neuron_bert, self).__init__()
+        super(WTA_layer_Neuron, self).__init__()
 
         tp_scale = scale  # .unsqueeze(-1)
         self.scale = tp_scale
@@ -552,7 +552,7 @@ class WTA_layer_neuron_bert(nn.Module):
         self.i_layer = i_layer
         self.log_base = 1.0/torch.log(torch.tensor(tau))
         if (trace_bool):
-            self.trace = neuron_bert.neuron_bert_trace(
+            self.trace = neuron.neuron_trace(
                 tau=tau, v_reset=None, timestep=timestep, wait=wait, start_time=self.starttime)
         else:
             self.trace = False
@@ -563,10 +563,10 @@ class WTA_layer_neuron_bert(nn.Module):
         self.tau = tau
         self.wta_bool = True
         self.block_wta = 0
-        self.accum_neuron_bert = neuron_bert.One_LIFNode(tau=tau, v_reset=None, v_threshold=(self.tau**(self.timestep-1)*(
+        self.accum_neuron = neuron.One_LIFNode(tau=tau, v_reset=None, v_threshold=(self.tau**(self.timestep-1)*(
             1-(1-1/tau)/2)), timestep=timestep, wait=0, start_time=self.starttime+wait, biopolar_bool=False)
 
-        self.neuron_bert = neuron_bert.WTA_neuron_bert(tau=tau, v_reset=None, v_threshold=float((self.tau**(self.timestep-1))/self.log_base),
+        self.neuron = neuron.WTA_neuron(tau=tau, v_reset=None, v_threshold=float((self.tau**(self.timestep-1))/self.log_base),
                                         timestep=timestep, wait=wait, start_time=self.starttime, threshold_mv=(self.tau**(self.timestep-1))/self.log_base)
         self.reset_threshold = (self.tau**(self.timestep-1))/self.log_base
 
@@ -581,8 +581,8 @@ class WTA_layer_neuron_bert(nn.Module):
 
         if (x is not None):
             if self.initialize == False:
-                self.neuron_bert(torch.zeros_like(x))
-                self.accum_neuron_bert(torch.zeros_like(x.sum(-1)))
+                self.neuron(torch.zeros_like(x))
+                self.accum_neuron(torch.zeros_like(x.sum(-1)))
                 self.spike_counts = 0
 
                 self.block = torch.zeros_like(x)
@@ -603,7 +603,7 @@ class WTA_layer_neuron_bert(nn.Module):
                 self.block_input = torch.where(
                     tp_max > 0.0, 0, self.block_input)
 
-            x = self.neuron_bert(x, time=self.t)
+            x = self.neuron(x, time=self.t)
 
         else:
             x = None
@@ -644,15 +644,15 @@ class WTA_layer_neuron_bert(nn.Module):
             self.trace_pure = 0
             self.trace_v = 0
         self.block_input = 0
-        self.neuron_bert.reset()
-        self.accum_neuron_bert.reset()
+        self.neuron.reset()
+        self.accum_neuron.reset()
         # if (self.spike_counts > 0):
         self.spike_count_meter.update(self.spike_counts)
         self.mem_count_meter.update(self.mem_counts)
         self.mem_counts=0
         self.spike_counts = 0
-        self.neuron_bert.v_threshold = self.reset_threshold
-        self.neuron_bert.v = 0.0
+        self.neuron.v_threshold = self.reset_threshold
+        self.neuron.v = 0.0
         self.initialize = False
         self.wta_bool = True
 
@@ -680,9 +680,9 @@ class LabelSmoothing(nn.Module):
         return loss.mean()
 
 
-class Scaledneuron_bert_onespike_time_double(nn.Module):
+class ScaledNeuron_onespike_time_double(nn.Module):
     def __init__(self, scale=1., timestep = 24, wait =12,start_time=0 , i_layer=0, tau = 2.0,convert = False, modulename = None,trace_bool = False, stdp_bool = False,scale_full =False,final_bool =False):
-        super(Scaledneuron_bert_onespike_time_double, self).__init__()
+        super(ScaledNeuron_onespike_time_double, self).__init__()
         # print(modulename,start_time,i_layer)
         self.scale_full = scale_full
         if(self.scale_full):
@@ -705,11 +705,11 @@ class Scaledneuron_bert_onespike_time_double(nn.Module):
         self.tau = tau
         self.log_base = 1.0/torch.log(torch.tensor(tau))
         if(trace_bool):
-            self.trace = neuron_bert.neuron_bert_trace(tau=tau,v_reset=None,timestep = timestep,wait =wait, start_time= self.starttime)
+            self.trace = neuron.neuron_trace(tau=tau,v_reset=None,timestep = timestep,wait =wait, start_time= self.starttime)
         else:
             self.trace = False
         self.trace_v = None
-        self.neuron_bert = neuron_bert.double_threshold_neuron_bert(tau=tau,v_reset=None, v_threshold=(tau**(wait))*(1-(1-1/tau)/2),timestep = timestep,wait =wait, start_time= self.starttime,biopolar_bool = False,threshold_shift=float((self.tau**(self.timestep-1))/self.log_base/2),threshold_mv=((self.tau**(self.timestep-1))/self.log_base),scale=self.scale)
+        self.neuron = neuron.double_threshold_neuron(tau=tau,v_reset=None, v_threshold=(tau**(wait))*(1-(1-1/tau)/2),timestep = timestep,wait =wait, start_time= self.starttime,biopolar_bool = False,threshold_shift=float((self.tau**(self.timestep-1))/self.log_base/2),threshold_mv=((self.tau**(self.timestep-1))/self.log_base),scale=self.scale)
         self.reset_threshold = (self.tau**(self.timestep-1))/self.log_base/2
         self.tp =0
         self.initialize = False
@@ -738,7 +738,7 @@ class Scaledneuron_bert_onespike_time_double(nn.Module):
             if self.initialize == False:
                 self.stdp_scale =1
                 self.spike_counts =0
-                self.neuron_bert(torch.zeros_like(x) )
+                self.neuron(torch.zeros_like(x) )
                 self.block = torch.zeros_like(x)
                 self.block_input = torch.ones_like(x.max(-1).values)
                 self.x_sign = torch.zeros_like(x)
@@ -748,12 +748,12 @@ class Scaledneuron_bert_onespike_time_double(nn.Module):
                 #     self.trace(torch.ones_like(x))
         if(self.t >= (self.starttime) and self.t < (self.starttime + 2*self.timestep+self.wait) ):
             if(self.t == (self.starttime + self.timestep+self.wait)):
-                self.neuron_bert.v /= self.tau**self.timestep
-            x= self.neuron_bert(x,time = self.t)
+                self.neuron.v /= self.tau**self.timestep
+            x= self.neuron(x,time = self.t)
             if(self.t >= (self.starttime+self.wait) and self.t < (self.starttime + self.timestep+self.wait) ):
                 if(x is not None):
                     tp_max = x.max(-1).values
-                    self.neuron_bert.v -= tp_max.unsqueeze(-1)*self.block_input.unsqueeze(-1)*self.neuron_bert.v_threshold
+                    self.neuron.v -= tp_max.unsqueeze(-1)*self.block_input.unsqueeze(-1)*self.neuron.v_threshold
                     self.block_input = torch.where(tp_max>0.0,0,self.block_input)
                     x = None
             # else:
@@ -792,7 +792,7 @@ class Scaledneuron_bert_onespike_time_double(nn.Module):
             self.t = 0
         self.block = 0
         self.tp =0
-        self.neuron_bert.reset()
+        self.neuron.reset()
         if(self.trace):
             self.trace.reset()
             self.trace_pure =0
@@ -800,9 +800,9 @@ class Scaledneuron_bert_onespike_time_double(nn.Module):
         # if(self.spike_counts>0):
         self.spike_count_meter.update(self.spike_counts)
         self.spike_counts =0
-        self.neuron_bert.v =0.0
+        self.neuron.v =0.0
         self.x_sign = None
         self.stdp_scale =1
         self.spike_sum =0
-        self.neuron_bert.threshold_shift = self.reset_threshold
+        self.neuron.threshold_shift = self.reset_threshold
         self.initialize = False
