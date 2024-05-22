@@ -126,7 +126,7 @@ if __name__ == "__main__":
     parser.add_argument('--timestep', type=int, required=True)
     parser.add_argument('--base', type=float, required=True)
 
-    parser.add_argument("--local_rank", default=0, type=int)
+    parser.add_argument("--rank", default=0, type=int)
 
     args = parser.parse_args()
     print(args)
