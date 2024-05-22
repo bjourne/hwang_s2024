@@ -14,8 +14,8 @@ link for pretrained pre-trained MA-BERT for SST-2: https://drive.google.com/file
 In the case paper is accepted, we will provide online resource.
 
 In this code, you need to download pre-trained model on google drive.
-First, the code will run ANN(swin_tiny_patch4_window7_224) for scaling threshold(or weight normalization) and searching base.
-Then, pre-trained parameter will converted to SNN.(main_distributed.py)
+First, the code will run ANN(swin_tiny_patch4_window7_224 or ma-bert) for scaling threshold(or weight normalization) and searching base.
+Then, pre-trained parameter will converted to SNN.(inferece_##.py)
 
 ## Environments
 To install Environments:
@@ -69,5 +69,5 @@ NCCL_P2P_DISABLE="1" NCCL_IB_DISABLE="1" torchrun --nproc_per_node 1  inference_
 ```
 
 Note Multi-GPU not supported on MABERT-to-SpikedAttention.
+Note ImageNet pre-trained model must be included.
 
- 
