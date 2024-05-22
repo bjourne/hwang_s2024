@@ -7,7 +7,7 @@ Beacuse of limitation of supplement and annonymity, one of pre-trained ANN(swin-
 
 link for pretrained Swin-Transformer: https://drive.google.com/file/d/1SsV4KjJdISWiII378TgArzgT0ZQ-KixF/view?pli=1
 
-link for pretrained Swin-Transformer: https://drive.google.com/file/d/1SsV4KjJdISWiII378TgArzgT0ZQ-KixF/view?pli=1
+link for pretrained Swin-Transformer: https://drive.google.com/file/d/1A8bdmnU77eh-mDd_Zb0-RryR0zxvBAKH/view 
 
 In the case paper is accepted, we will provide online resource.
 
