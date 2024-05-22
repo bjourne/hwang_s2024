@@ -2,7 +2,7 @@ import torch
 from torch import nn
 import numpy as np
 import pandas as pd 
-from utils_neuron import *
+from utils_neuron_bert import *
 # BERT
 from transformers.models.bert.ma_bert.modeling_ma_bert import MA_BertForSequenceClassification
 from transformers.models.bert.ma_bert.configuration_ma_bert import MA_BertConfig
