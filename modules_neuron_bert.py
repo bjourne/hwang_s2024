@@ -2,7 +2,7 @@ from torch import nn
 import torch.nn.functional as F
 import torch
 from spikingjelly.activation_based import neuron
-from timm.utils import AverageMeter
+from metrics import AverageMeter
 
 
 class StraightThrough(nn.Module):
@@ -284,7 +284,7 @@ class ScaledNeuron_onespike_time_relu(nn.Module):
             self.trace = False
         self.trace_v = None
         if (self.convert):
-            self.neuron = neuron.One_LIFNode_convert_bert(tau=tau, v_reset=None, v_threshold=(
+            self.neuron = neuron.One_LIFNode_convert(tau=tau, v_reset=None, v_threshold=(
                 2**(wait)*(1-(1-1/tau)/2)), timestep=timestep, wait=wait, start_time=self.starttime, biopolar_bool=False)
 
         else:
@@ -419,7 +419,7 @@ class ScaledNeuron_onespike_time_bipolar(nn.Module):
             self.trace = False
         self.trace_v = None
         if (self.convert):
-            self.neuron = neuron.One_LIFNode_convert_bert(tau=tau, v_reset=None, v_threshold=(
+            self.neuron = neuron.One_LIFNode_convert(tau=tau, v_reset=None, v_threshold=(
                 2**(wait)*(1-(1-1/tau)/2)), timestep=timestep, wait=wait, start_time=self.starttime, biopolar_bool=True)
 
         else:

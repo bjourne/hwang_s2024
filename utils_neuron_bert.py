@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from modules_neuron_bert import StraightThrough, WTA_layer_Neuron, MCN,MCN_2,MCN_3, ScaledNeuron_onespike_time_bipolar, ScaledNeuron_onespike_time_relu
+from modules_neuron import StraightThrough, WTA_layer_Neuron, MCN,MCN_2,MCN_3, ScaledNeuron_onespike_time_bipolar, ScaledNeuron_onespike_time_relu
 
 
 def isActivation(name):
