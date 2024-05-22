@@ -155,7 +155,7 @@ group.add_argument('--eval-metric', default='top1', type=str, metavar='EVAL_METR
                    help='Best metric (default: "top1"')
 group.add_argument("--local_rank", default=0, type=int)
 
-parser.add_argument('--base', default=1.16, type=float, metavar='N',
+parser.add_argument('--base', default=1.15, type=float, metavar='N',
                     help='base of one spike')
 parser.add_argument('--timestep',  default=40, type=int,
                     metavar='N', help='number of timestep')
