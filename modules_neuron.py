@@ -134,7 +134,7 @@ class ScaledNeuron_onespike_time_relu(nn.Module):
         super(ScaledNeuron_onespike_time_relu, self).__init__()
         self.scale_full = scale_full
         if (self.scale_full):
-            tp_scale = scale.unsqueeze(0)
+            tp_scale = scale#.unsqueeze(0)
 
         else:
             tp_scale = scale.unsqueeze(-1).unsqueeze(0)
@@ -273,7 +273,7 @@ class ScaledNeuron_onespike_time_bipolar(nn.Module):
         super(ScaledNeuron_onespike_time_bipolar, self).__init__()
         self.scale_full = scale_full
         if (self.scale_full):
-            tp_scale = scale.unsqueeze(0)
+            tp_scale = scale#.unsqueeze(0)
 
         else:
             tp_scale = scale.unsqueeze(-1).unsqueeze(0)
@@ -564,11 +564,11 @@ class NoPIP_neuron(nn.Module):
         else:
             if(self.relu_bool):
                 self.neuron = ScaledNeuron_onespike_time_relu(scale=self.scale, timestep=timestep, wait=1, start_time=0, i_layer=n_layer,
-                                                        tau=base, convert=self.convert_bool, trace_bool=True, stdp_bool=False)   
+                                                        tau=base, convert=self.convert_bool, trace_bool=True, stdp_bool=False,scale_full=True)   
             
             else:
                 self.neuron = ScaledNeuron_onespike_time_bipolar(scale=self.scale, timestep=timestep, wait=1, start_time=0, i_layer=n_layer,
-                                                        tau=base, convert=self.convert_bool, trace_bool=True, stdp_bool=False)   
+                                                        tau=base, convert=self.convert_bool, trace_bool=True, stdp_bool=False,scale_full=True)   
             
     def forward(self, x):
         if(self.softmax_bool):
