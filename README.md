@@ -5,7 +5,7 @@ The code is designed by PyTorch Image Models(TIMM) and SpikingJelly framework.
 Beacuse of limitation of supplement and annonymity, one of pre-trained ANN(swin-tiny without ReLU) is uploaded on below google drive. 
 * new annonymous google account created for sharing 
 
-link for pretrained Swin-Transformer: https://drive.google.com/file/d/1SsV4KjJdISWiII378TgArzgT0ZQ-KixF/view?pli=1
+link for pretrained Swin-Transformer: https://drive.google.com/file/d/1RJH_tdjKLoUHRg0G25ccr0hG8oEQ_lmz/view?usp=sharing
 
 link for pretrained Swin-Transformer: https://drive.google.com/file/d/1A8bdmnU77eh-mDd_Zb0-RryR0zxvBAKH/view 
 
