@@ -84,6 +84,50 @@ class ANN_neruon(nn.Module):
 
         return x
 
+class ANN_neruon_bert(nn.Module):
+    def __init__(self, up=2., t=32, batch_size=64):
+        super().__init__()
+        self.max_act = 0
+        self.t = t
+        self.batch_size = batch_size
+        self.relu_bool = False
+        self.i_layer = 0
+        self.relu = nn.ReLU()
+        self.name = None
+        self.full_scale = False
+        self.batch_fusion_bool = False
+        self.last_dim =0
+        self.sparisty_meter = AverageMeter()
+
+    def forward(self, x):
+
+        if (self.relu_bool):
+            x = self.relu(x)
+        
+
+        ######
+        # Code for get distribution of Activation on Transformer
+        ######
+
+        # find the scale of each neuron on inference
+        if (isinstance(self.max_act, int)):
+                    if(self.name=="stdp_av" or self.name=="stdp_qk" or self.name=="k_if" or self.name=="q_if" or self.name=="v_if" ):
+                        self.max_act = x.abs().max(0).values.max(-1).values.unsqueeze(-1)
+                        self.last_dim = x.shape[-1]
+
+                    else:
+                        self.max_act = x.abs().max(0).values
+        else:
+                    if(self.name=="stdp_av" or self.name=="stdp_qk"or self.name=="k_if" or self.name=="q_if" or self.name=="v_if" ):
+                        self.max_act = torch.maximum(x.abs().max(0).values.max(-1).values.unsqueeze(-1), self.max_act)
+                        # self.last_dim = x.shape[-1]
+
+                    else:
+                        self.max_act = torch.maximum(x.abs().max(0).values, self.max_act)
+        self.sparisty_meter.update(torch.count_nonzero(x)/torch.numel(x))
+
+        return x
+
 
 class ScaledNeuron_onespike_time_relu(nn.Module):
     def __init__(self, scale=1., timestep=24, wait=12, start_time=0, i_layer=0, tau=2.0, convert=False, modulename=None, trace_bool=False, stdp_bool=False, scale_full=False, final_bool=False):
