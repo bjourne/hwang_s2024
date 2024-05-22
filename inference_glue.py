@@ -2,7 +2,7 @@ import torch
 from torch import nn
 import numpy as np
 import pandas as pd 
-from utils_neuron import *
+from utils_neuron_bert import *
 # BERT
 from transformers.models.bert.ma_bert.modeling_ma_bert import MA_BertForSequenceClassification
 from transformers.models.bert.ma_bert.configuration_ma_bert import MA_BertConfig
@@ -190,7 +190,7 @@ if __name__ == "__main__":
     )
 
     validation_key = "validation_mismatched" if task == "mnli-mm" else "validation_matched" if task == "mnli" else "validation"
-    student_model, n_layer = replace_identity_by_module_bert(student_model,0,batch_size)
+    student_model, n_layer = replace_identity_by_module(student_model,0,batch_size)
 
 
     trainer = Trainer(
@@ -207,7 +207,7 @@ if __name__ == "__main__":
     print(trainer.evaluate())
     print(f"number of GFLOPs: {student_model.flops() / 1e9 :>7.3f}  ")
     print(f"Total ANN Energy (mJ): {student_model.flops_ANN().data / 1e9 :>7.3f}  ")
-    model_2, n_layer = replace_by_NoPIP_neuron(student_model,n_layer=0,timestep=args.timestep,tau=args.base) 
+    model_2, n_layer = replace_MCN_by_MCN2(student_model,n_layer=0,timestep=args.timestep,tau=args.base) 
     SNN = Trainer(
     model=model_2,
     args=training_args,
