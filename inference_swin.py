@@ -430,7 +430,7 @@ def validate(
             energy = model.module.flops_ANN(1.0)
             flops = model.module.flops()            
         else:
-            flops = model.flops_ANN(1.0)
+            energy = model.flops_ANN(1.0)
             flops = model.flops()            
         logger.info(
             f'{log_name}:  '
