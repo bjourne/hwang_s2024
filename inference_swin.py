@@ -431,7 +431,7 @@ def validate(
             flops = model.module.flops()            
         else:
             flops = model.flops_ANN(1.0)
-            flops = model.flops(1.0)            
+            flops = model.flops()            
         logger.info(
             f'{log_name}:  '
             f'Acc@1: {top1_m.avg:>7.3f}  '
