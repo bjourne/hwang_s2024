@@ -11,8 +11,6 @@ link for pretrained pre-trained MA-BERT for SST-2: https://drive.google.com/file
 ** You should unzip the file 
 
 
-In the case paper is accepted, we will provide online resource.
-
 In this code, you need to download pre-trained model on google drive.
 First, the code will run ANN(swin_tiny_patch4_window7_224 or ma-bert) for scaling threshold(or weight normalization) and searching base.
 Then, pre-trained parameter will converted to SNN and run it.(inferece_##.py)
