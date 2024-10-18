@@ -48,24 +48,3 @@ torchrun --nproc_per_node 4 inference_swin.py /workspace/dataset/imagenet --batc
 ```
 Note ImageNet data path and pre-trained model must be included.
 
-# How to RUN (MABERT-to-SpikedAttention) 
-** only pre-trained model (MA-BERT) for SST-2 provided
-Run
-```
-torchrun --nproc_per_node 1 inference_glue.py --task "selected task" --batch-size "batch_size" --pretrained_file "path of pre-trained ANN(file name)" --base "base B" --timestep "number of timestep"
-```
-In result, you can see result (accuracy/energy) as "MABERT-SpikedAttention.log"
-
-For example, run
-```
-torchrun --nproc_per_node 1  inference_glue.py --task sst2 --pretrained_file sst2-392-sst2 --batch_size 16  --base 1.4 --timestep 16
-```
-
-If you use RTX 4000 Series, you need to Run as
-```
-NCCL_P2P_DISABLE="1" NCCL_IB_DISABLE="1" torchrun --nproc_per_node 1  inference_glue.py --pretrained_file sst2-392-sst2 --batch_size 16  --base 1.4 --timestep 16
-```
-
-Note Multi-GPU not supported on MABERT-to-SpikedAttention.
-Note ImageNet pre-trained model must be included.
-
