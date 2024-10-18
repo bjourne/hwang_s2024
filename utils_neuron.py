@@ -21,43 +21,6 @@ def issigmoid(name):
     return False
 
 
-
-def replace_identity_by_module_bert(model, i_layer, batch_size):
-    for name, module in model._modules.items():
-        if hasattr(module, "_modules"):
-            model._modules[name], i_layer = replace_identity_by_module_bert(
-                module, i_layer, batch_size)
-
-        if ((module.__class__.__name__ == "Identity" or module.__class__.__name__ == "ReLU") and name != "downsample" and name != "drop_path1" and name != "drop_path2" and name != "flatten"):
-            model._modules[name] = ANN_neruon_bert(batch_size=batch_size)
-            model._modules[name].i_layer = i_layer
-            model._modules[name].name = name
-            if (name != "q_if" and name != "k_if"):
-                i_layer += 1
-
-            if (module.__class__.__name__ == "ReLU"):
-                model._modules[name].relu_bool = True
-    return model, i_layer
-
-def replace_by_NoPIP_neuron(model, timestep, n_layer, tau):
-
-    for name, module in model._modules.items():
-        if hasattr(module, "_modules"):
-            model._modules[name], n_layer = replace_by_NoPIP_neuron(
-                module, timestep, n_layer, tau)
-        if hasattr(module, "ann"):
-            model._modules[name].ann = False
-        if hasattr(module, "max_act"):
-                if(name!="final_if"):
-                    if(name=="softmax_if"):
-                        model._modules[name] = NoPIP_neuron(max_scale=module.max_act, timestep=timestep, base=tau, relu_bool=module.relu_bool,softmax_bool=True,name=name,n_layer=model._modules[name].i_layer)
-                    else:
-                        model._modules[name] = NoPIP_neuron(max_scale=module.max_act, timestep=timestep, base=tau, relu_bool=module.relu_bool,name=name,n_layer=model._modules[name].i_layer)
-                    model._modules[name].last_dim = module.last_dim
-
-    
-    return model, n_layer
-
 def replace_identity_by_module(model, i_layer, batch_size):
     for name, module in model._modules.items():
         if hasattr(module, "_modules"):
@@ -79,6 +42,8 @@ def replace_identity_by_module(model, i_layer, batch_size):
 
 def replace_ANN_neruon_by_neuron_wait(model, timestep, wait, n_layer, tau):
 
+    if hasattr(model, "snn_mode"):
+            model.snn_mode = True
     for name, module in model._modules.items():
         if hasattr(module, "_modules"):
             model._modules[name], n_layer = replace_ANN_neruon_by_neuron_wait(
