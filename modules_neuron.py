@@ -166,7 +166,7 @@ class ScaledNeuron_onespike_time_relu(nn.Module):
                 else:
                     self.neuron.v /= self.stdp_scale
             x = self.neuron(x, time=self.t)
-
+            assert False, x
         else:
             x = None
 
