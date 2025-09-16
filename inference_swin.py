@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 import argparse
 import logging
 import os
@@ -50,9 +48,6 @@ has_compile = hasattr(torch, 'compile')
 
 logger = logging.getLogger('Spiked-Attention')
 
-# file_handler = logging.FileHandler('Swin-SpikedAttention.log')
-# logger.addHandler(file_handler)
-
 # The first arg parser parses out only the --config argument, this argument is used to
 # load a yaml file containing key-values that override the defaults for the main parser below
 config_parser = parser = argparse.ArgumentParser(
@@ -66,12 +61,18 @@ parser = argparse.ArgumentParser(description='PyTorch ImageNet Training')
 # Dataset parameters
 group = parser.add_argument_group('Dataset parameters')
 # Keep this argument outside the dataset group because it is positional.
-parser.add_argument('data', nargs='?', metavar='DIR', const=None,
-                    help='path to dataset (positional is *deprecated*, use --data-dir)')
-parser.add_argument('--data-dir', metavar='DIR',
-                    help='path to dataset (root dir)')
-parser.add_argument('--dataset', metavar='NAME', default='',
-                    help='dataset type + name ("<type>/<name>") (default: ImageFolder or ImageTar if empty)')
+parser.add_argument(
+    'data', nargs='?', metavar='DIR', const=None,
+    help='path to dataset (positional is *deprecated*, use --data-dir)'
+)
+parser.add_argument(
+    '--data-dir', metavar='DIR',
+    help='path to dataset (root dir)'
+)
+parser.add_argument(
+    '--dataset', metavar='NAME', default='',
+    help='dataset type + name ("<type>/<name>") (default: ImageFolder or ImageTar if empty)'
+)
 
 group.add_argument('--val-split', metavar='NAME', default='validation',
                    help='dataset validation split (default: validation)')
@@ -102,14 +103,22 @@ group.add_argument('--in-chans', type=int, default=None, metavar='N',
 group.add_argument('--input-size', default=None, nargs=3, type=int,
                    metavar='N N N',
                    help='Input all image dimensions (d h w, e.g. --input-size 3 224 224), uses model default if empty')
-group.add_argument('--crop-pct', default=None, type=float,
-                   metavar='N', help='Input image center crop percent (for validation only)')
-group.add_argument('--mean', type=float, nargs='+', default=None, metavar='MEAN',
-                   help='Override mean pixel value of dataset')
-group.add_argument('--std', type=float, nargs='+', default=None, metavar='STD',
-                   help='Override std deviation of dataset')
-group.add_argument('-b', '--batch-size', type=int, default=64, metavar='N',
-                   help='Input batch size for training (default: 128)')
+group.add_argument(
+    '--crop-pct', default=None, type=float,
+    metavar='N', help='Input image center crop percent (for validation only)'
+)
+group.add_argument(
+    '--mean', type=float, nargs='+', default=None, metavar='MEAN',
+    help='Override mean pixel value of dataset'
+)
+group.add_argument(
+    '--std', type=float, nargs='+', default=None, metavar='STD',
+    help='Override std deviation of dataset'
+)
+group.add_argument(
+    '-b', '--batch-size', type=int, default=64, metavar='N',
+    help='Input batch size for training (default: 128)'
+)
 group.add_argument('--model-kwargs', nargs='*',
                    default={}, action=utils.ParseKwargs)
 
@@ -428,10 +437,10 @@ def validate(
         log_name = 'Pre-trained ANN Performance' + log_suffix
         if args.distributed:
             energy = model.module.flops_ANN(1.0)
-            flops = model.module.flops()            
+            flops = model.module.flops()
         else:
             energy = model.flops_ANN(1.0)
-            flops = model.flops()            
+            flops = model.flops()
         logger.info(
             f'{log_name}:  '
             f'Acc@1: {top1_m.avg:>7.3f}  '
@@ -535,7 +544,7 @@ def snn_validate(
 
                 else:
                     energy = model.flops_snn(input_count_meter.avg)
-                    flops = model.flops_snn2(input_count_meter.avg)                
+                    flops = model.flops_snn2(input_count_meter.avg)
                 log_name = 'SNN' + log_suffix
                 logger.info(
                     f'{log_name}: [{batch_idx:>4d}/{last_idx}]  '

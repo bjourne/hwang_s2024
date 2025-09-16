@@ -1,6 +1,9 @@
 import torch
 import torch.nn as nn
+
+
 from modules_neuron import StraightThrough, WTA_layer_Neuron, ANN_neruon,ScaledNeuron_onespike_time_bipolar, ScaledNeuron_onespike_time_relu
+from torch.nn import *
 
 
 def isActivation(name):
@@ -121,27 +124,30 @@ def replace_ANN_neruon_by_neuron_wait(model, timestep, wait, n_layer, tau):
     return model, n_layer
 
 
-def modif_bias(model, timestep, base, i_layer_bias, i_layer_mean):
-    for name, module in model._modules.items():
+def modif_bias(net, timestep, base, i_layer_bias, i_layer_mean):
+    for name, module in net._modules.items():
         if hasattr(module, "_modules"):
-            model._modules[name], i_layer_bias, i_layer_mean = modif_bias(
-                module, timestep, base, i_layer_bias, i_layer_mean)
+            net._modules[name], i_layer_bias, i_layer_mean = modif_bias(
+                module, timestep, base, i_layer_bias, i_layer_mean
+            )
 
         if hasattr(module, "bias"):
-            if (torch.is_tensor(model._modules[name].bias)):
+            if (torch.is_tensor(net._modules[name].bias)):
                 if (i_layer_bias > 1):
-                    model._modules[name].bias = nn.Parameter(
-                        model._modules[name].bias / ((1-1/(base**timestep))/(1-1/base)-1))
+                    net._modules[name].bias = Parameter(
+                        net._modules[name].bias / ((1-1/(base**timestep))/(1-1/base)-1)
+                    )
                 i_layer_bias += 1
 
         if hasattr(module, "running_mean"):
-            if (torch.is_tensor(model._modules[name].running_mean)):
+            if (torch.is_tensor(net._modules[name].running_mean)):
                 if (i_layer_mean > 0):
-                    model._modules[name].running_mean = nn.Parameter(
-                        model._modules[name].running_mean/((1-1/(base**timestep))/(1-1/base)-1))
+                    net._modules[name].running_mean = Parameter(
+                        net._modules[name].running_mean/((1-1/(base**timestep))/(1-1/base)-1)
+                    )
                 i_layer_mean += 1
 
-    return model, i_layer_bias, i_layer_mean
+    return net, i_layer_bias, i_layer_mean
 
 
 def reset_net(model):
@@ -179,7 +185,7 @@ def _fold_bn(conv_module, bn_module, avg=False):
 def fold_bn_into_conv(conv_module, bn_module, avg=False):
     w, b = _fold_bn(conv_module, bn_module, avg)
     if conv_module.bias is None:
-        conv_module.bias = nn.Parameter(b)
+        conv_module.bias = Parameter(b)
     else:
         conv_module.bias.data = b
     conv_module.weight.data = w
@@ -189,11 +195,11 @@ def fold_bn_into_conv(conv_module, bn_module, avg=False):
 
 
 def is_bn(m):
-    return isinstance(m, nn.BatchNorm2d) or isinstance(m, nn.BatchNorm1d)
+    return isinstance(m, BatchNorm2d) or isinstance(m, BatchNorm1d)
 
 
 def is_absorbing(m):
-    return (isinstance(m, nn.Conv2d)) or isinstance(m, nn.Linear)
+    return (isinstance(m, Conv2d)) or isinstance(m, Linear)
 
 
 def search_fold_and_remove_bn(model):
@@ -227,16 +233,8 @@ def regular_set(model, paras=([], [], [])):
     return paras
 
 
-class LabelSmoothing(nn.Module):
-    """
-    NLL loss with label smoothing.
-    """
-
+class LabelSmoothing(Module):
     def __init__(self, smoothing=0.1):
-        """
-        Constructor for the LabelSmoothing module.
-        :param smoothing: label smoothing factor
-        """
         super(LabelSmoothing, self).__init__()
         self.confidence = 1.0 - smoothing
         self.smoothing = smoothing

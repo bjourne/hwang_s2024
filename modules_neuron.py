@@ -282,7 +282,7 @@ class ScaledNeuron_onespike_time_bipolar(nn.Module):
                     self.md_shape[1] = self.md_shape[1]//batch_size
                 x = x.view(self.md_shape)
 
-            x = x/self.scale  
+            x = x/self.scale
             if self.initialize == False:
                 self.stdp_scale = 1
                 self.spike_counts = 0
@@ -492,16 +492,8 @@ class WTA_layer_Neuron(nn.Module):
 
 
 
-class LabelSmoothing(nn.Module):
-    """
-    NLL loss with label smoothing.
-    """
-
+class LabelSmoothing(Module):
     def __init__(self, smoothing=0.1):
-        """
-        Constructor for the LabelSmoothing module.
-        :param smoothing: label smoothing factor
-        """
         super(LabelSmoothing, self).__init__()
         self.confidence = 1.0 - smoothing
         self.smoothing = smoothing
@@ -513,5 +505,3 @@ class LabelSmoothing(nn.Module):
         smooth_loss = -logprobs.mean(dim=-1)
         loss = self.confidence * nll_loss + self.smoothing * smooth_loss
         return loss.mean()
-
-
